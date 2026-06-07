@@ -1,0 +1,9 @@
+# *
+User-agent: *
+Allow: /
+
+# Host
+Host: https://www.alvalens.my.id
+
+# Sitemaps
+Sitemap: https://www.alvalens.my.id/sitemap.xml

@@ -1,0 +1,206 @@
+{
+  "Projects": [
+    {
+      "show": true,
+      "title": "RECYCL'DAY",
+      "desc": [
+        "RECYCL'DAY est notre événement phare de sensibilisation et de collecte de déchets plastiques. Organisé plusieurs fois par an, cet événement mobilise des centaines de bénévoles pour nettoyer les plages, lagunes et espaces publics d'Abidjan.",
+        "Chaque édition de RECYCL'DAY combine action environnementale et éducation. Les participants apprennent les bonnes pratiques de tri, de recyclage et découvrent l'impact de la pollution plastique sur nos écosystèmes marins et terrestres.",
+        "Au-delà du nettoyage, RECYCL'DAY crée une communauté engagée de BLUE Makers qui continuent à agir pour l'environnement dans leur quotidien. Les déchets collectés sont triés et transformés en objets utiles grâce à nos ateliers de recyclage créatif."
+      ],
+      "year": "2024",
+      "preview": "",
+      "code": "",
+      "thumbnail": "/ong_blue/images/illustrations/page-landing/action_1.jpg",
+      "images": [
+        "/ong_blue/images/illustrations/page-landing/action_1.jpg",
+        "/ong_blue/images/illustrations/page-landing/action_2.jpg",
+        "/ong_blue/images/illustrations/page-landing/community-cleanup-volunteers-beach.jpg"
+      ],
+      "tech": [
+        "Sensibilisation",
+        "Collecte",
+        "Recyclage",
+        "Action Communautaire"
+      ],
+      "slug": "recycl-day",
+      "category": [1]
+    },
+    {
+      "show": true,
+      "title": "Journée Mondiale des Océans",
+      "desc": [
+        "Chaque année, BLUE célèbre la Journée Mondiale des Océans avec une série d'activités de sensibilisation et de nettoyage des zones côtières. Cet événement met en lumière l'importance de la protection des océans et de la biodiversité marine.",
+        "Nos activités incluent des ateliers éducatifs dans les écoles, des conférences sur la pollution plastique marine, et des actions de nettoyage massives sur les plages d'Abidjan. Nous collaborons avec des scientifiques et des experts pour sensibiliser le public aux enjeux océaniques.",
+        "La Journée Mondiale des Océans est aussi l'occasion de présenter nos projets de recyclage créatif et de montrer comment les déchets collectés peuvent être transformés en ressources utiles. C'est un moment fort de mobilisation citoyenne pour la protection de nos océans."
+      ],
+      "year": "2024",
+      "preview": "",
+      "code": "",
+      "thumbnail": "/ong_blue/images/illustrations/page-landing/ocean-conservation-initiative-blue.jpg",
+      "images": [
+        "/ong_blue/images/illustrations/page-landing/ocean-conservation-initiative-blue.jpg",
+        "/ong_blue/images/illustrations/page-landing/marine-research-ocean-pollution-study.jpg",
+        "/ong_blue/images/illustrations/page-landing/action_3.jpg"
+      ],
+      "tech": [
+        "Sensibilisation",
+        "Éducation",
+        "Protection Marine",
+        "Nettoyage Côtier"
+      ],
+      "slug": "journee-mondiale-oceans",
+      "category": [1]
+    },
+    {
+      "show": true,
+      "title": "One BLUE Maker, One Tree",
+      "desc": [
+        "Le projet 'One BLUE Maker, One Tree' est notre initiative de reforestation qui vise à planter un arbre pour chaque bénévole actif de BLUE. Ce projet contribue à la restauration des espaces verts et à la lutte contre le changement climatique.",
+        "Nous organisons des sessions de plantation d'arbres dans différentes régions de Côte d'Ivoire, en collaboration avec les communautés locales. Chaque arbre planté est géolocalisé et suivi pour assurer sa croissance et son impact environnemental.",
+        "Au-delà de la plantation, nous sensibilisons les participants à l'importance des forêts pour la biodiversité, la qualité de l'air et la régulation du climat. Ce projet crée un lien durable entre nos bénévoles et l'environnement."
+      ],
+      "year": "2023",
+      "preview": "",
+      "code": "",
+      "thumbnail": "/ong_blue/images/illustrations/page-landing/sustainable-future-ocean-protection.jpg",
+      "images": [
+        "/ong_blue/images/illustrations/page-landing/sustainable-future-ocean-protection.jpg",
+        "/ong_blue/images/illustrations/page-landing/action_4.jpg",
+        "/ong_blue/images/illustrations/page-accueil/ite-3.jpg"
+      ],
+      "tech": [
+        "Reforestation",
+        "Action Climatique",
+        "Biodiversité",
+        "Engagement Communautaire"
+      ],
+      "slug": "one-blue-maker-one-tree",
+      "category": [1]
+    },
+    {
+      "show": true,
+      "title": "BLUE Academy",
+      "desc": [
+        "BLUE Academy est notre plateforme de formation en ligne dédiée à l'éducation environnementale. Elle permet aux participants d'accéder à des modules éducatifs sur la pollution plastique, le recyclage, et le développement durable.",
+        "La plateforme propose des quiz interactifs, des vidéos éducatives, et un système de suivi de progression. Les participants peuvent obtenir des certificats numériques après avoir complété les modules de formation, validant ainsi leurs compétences en tant qu'ambassadeurs environnementaux.",
+        "BLUE Academy rend l'éducation environnementale accessible à tous, partout en Côte d'Ivoire et au-delà. C'est un outil essentiel pour former la prochaine génération de défenseurs de l'environnement."
+      ],
+      "year": "2023",
+      "preview": "",
+      "code": "",
+      "thumbnail": "/ong_blue/images/illustrations/page-landing/blue_training_1.png",
+      "images": [
+        "/ong_blue/images/illustrations/page-landing/blue_training_1.png",
+        "/ong_blue/images/illustrations/page-landing/blue_training_2.png",
+        "/ong_blue/images/illustrations/page-landing/blue_training_3.png"
+      ],
+      "tech": [
+        "Formation en Ligne",
+        "Éducation",
+        "Certification",
+        "E-learning"
+      ], 
+      "slug": "blue-academy",
+      "category": [1]
+    },
+    {
+      "show": true,
+      "title": "Recyclage Créatif",
+      "desc": [
+          "Notre atelier de recyclage créatif transforme les déchets plastiques collectés lors de nos actions en objets utiles et artistiques. Cette initiative démontre qu'il est possible de donner une seconde vie aux déchets plastiques.",
+          "Les participants apprennent des techniques de transformation du plastique pour créer des accessoires, des objets de décoration, et des produits utiles au quotidien. Chaque création est unique et porte un message fort sur l'économie circulaire.",
+          "Le recyclage créatif sensibilise à la réduction des déchets tout en développant des compétences artisanales. Les produits créés sont vendus dans notre boutique BLUE Shop, générant des revenus pour soutenir nos activités environnementales."
+        ],
+      "year": "2023",
+      "preview": "",
+      "code": "",
+      "thumbnail": "/ong_blue/images/illustrations/page-accueil/ite-1.jpg",
+      "images": [
+        "/ong_blue/images/illustrations/page-accueil/ite-1.jpg",
+        "/ong_blue/images/illustrations/page-accueil/ite-2.jpg",
+        "/ong_blue/images/illustrations/page-accueil/ite-4.jpg"
+      ],
+      "tech": [
+        "Recyclage",
+        "Économie Circulaire",
+        "Artisanat",
+        "Innovation"
+      ], 
+      "slug": "recyclage-creatif",
+      "category": [1]
+    },
+    {
+      "show": true,
+      "title": "Campagne de Sensibilisation Scolaire",
+      "desc": [
+        "Programme de sensibilisation dans les écoles primaires et secondaires d'Abidjan pour éduquer les jeunes générations sur les enjeux de la pollution plastique et l'importance du recyclage.",
+        "Interventions interactives avec des ateliers pratiques, des jeux éducatifs et des démonstrations de tri des déchets. Distribution de supports pédagogiques et organisation de concours de recyclage entre classes."
+      ],
+      "year": "2024",
+      "preview": "",
+      "code": "",
+      "thumbnail": "/ong_blue/images/illustrations/page-landing/blue_training_4.png",
+      "images": [
+        "/ong_blue/images/illustrations/page-landing/blue_training_4.png",
+        "/ong_blue/images/illustrations/page-landing/blue_training_5.png"
+      ],
+      "tech": [
+        "Éducation",
+        "Sensibilisation",
+        "Jeunesse",
+        "Ateliers"
+      ], 
+      "slug": "sensibilisation-scolaire",
+      "category": [2]
+    },
+    {
+      "show": true,
+      "title": "Nettoyage de la Lagune Ébrié",
+      "desc": [
+        "Action de grande envergure pour nettoyer les berges de la lagune Ébrié, l'un des écosystèmes les plus pollués d'Abidjan. Mobilisation de centaines de bénévoles pour collecter les déchets plastiques.",
+        "Collaboration avec les autorités locales et les communautés riveraines pour sensibiliser sur l'impact de la pollution sur la faune aquatique et la santé publique."
+      ],
+      "year": "2023",
+      "preview": "",
+      "code": "",
+      "thumbnail": "/ong_blue/images/illustrations/page-landing/action_2.jpg",
+      "images": [
+        "/ong_blue/images/illustrations/page-landing/action_2.jpg",
+        "/ong_blue/images/illustrations/page-landing/action_4.jpg"
+      ],
+      "tech": [
+        "Nettoyage",
+        "Protection Aquatique",
+        "Mobilisation",
+        "Environnement"
+      ], 
+      "slug": "nettoyage-lagune-ebrie",
+      "category": [1]
+    },
+    {
+      "show": true,
+      "title": "Formation des Ambassadeurs BLUE",
+      "desc": [
+        "Programme de formation intensive pour créer une communauté d'ambassadeurs environnementaux capables de mener des actions de sensibilisation dans leurs quartiers et communautés.",
+        "Les ambassadeurs BLUE reçoivent une formation complète sur la pollution plastique, les techniques de recyclage, et les méthodes de mobilisation communautaire. Ils deviennent des leaders du changement environnemental."
+      ],
+      "year": "2023",
+      "preview": "",
+      "code": "",
+      "thumbnail": "/ong_blue/images/illustrations/page-landing/blue_training_3.png",
+      "images": [
+        "/ong_blue/images/illustrations/page-landing/blue_training_3.png",
+        "/ong_blue/images/illustrations/page-accueil/ite-5.jpg"
+      ],
+      "tech": [
+        "Formation",
+        "Leadership",
+        "Ambassadeurs",
+        "Mobilisation"
+      ], 
+      "slug": "formation-ambassadeurs",
+      "category": [2]
+    }
+  ]
+}
