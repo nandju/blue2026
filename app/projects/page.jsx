@@ -60,10 +60,10 @@ export default function Page() {
 						</h1>
 						<Hr />
 						<p className="title  text-xl mt-4 tracking-wider text-gray-900 leading-[1.7rem] mb-5">
-							Découvrez nos initiatives pour la protection de l'environnement{" "}
+							Nos actions contre la pollution plastique et{" "}
 							<span className="bg-transparent md:bg-gray-100 bg-opacity-50 xl:bg-transparent">
 								{" "}
-								et la lutte contre la pollution plastique.
+								pour la planète.
 							</span>
 						</p>
 						<motion.div
