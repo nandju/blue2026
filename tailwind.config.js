@@ -12,6 +12,9 @@ module.exports = {
 					primary: '#0D6EBB',
 					secondary: '#0DBD9F',
 				},
+				'blue-primary': '#0D6EBB',
+				'blue-secondary': '#FFFFFF',
+				'blue-tertiary': '#0DBD9F',
 			},
 			fontFamily: {
 				outfit: ['Outfit', 'sans-serif'],

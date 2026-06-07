@@ -20,10 +20,10 @@ const Sidebar = () => {
 	const { moveTo, activeIndex } = useFullPage();
 
 	return (
-		<div className="hidden md:flex fixed z-40 bg-gray-700 h-[50vh] w-14 flex-col justify-between items-center p-4 left-0 top-1/4 rounded-e-3xl">
+		<div className="hidden md:flex fixed z-40 bg-[#0D6EBB] h-[50vh] w-14 flex-col justify-between items-center p-4 left-0 top-1/4 rounded-e-3xl">
 			<ul
 				id="sidebar"
-				className="flex flex-col justify-evenly items-center h-full text-gray-50">
+				className="flex flex-col justify-evenly items-center h-full text-white">
 				{navItems.map((item, index) => (
 					<li key={item.anchor} data-menuanchor={item.anchor}>
 						<button
@@ -33,7 +33,7 @@ const Sidebar = () => {
 							{activeIndex === index && (
 								<motion.div
 									layoutId="sidebar-active"
-									className="absolute inset-0 bg-gray-500 rounded-xl"
+									className="absolute inset-0 bg-[#0DBD9F] rounded-xl"
 									transition={{
 										type: "spring",
 										stiffness: 350,

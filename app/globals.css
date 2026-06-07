@@ -90,3 +90,73 @@ a[title]:hover:after {
 	background: #0D6EBB;
 	color: #fff;
 }
+
+/* BLUE Design System - Color Palette */
+:root {
+	--blue-primary: #0D6EBB;
+	--blue-secondary: #FFFFFF;
+	--blue-tertiary: #0DBD9F;
+	--blue-primary-light: rgba(13, 110, 187, 0.1);
+	--blue-primary-dark: #0a5a9a;
+	--blue-tertiary-light: rgba(13, 189, 159, 0.1);
+}
+
+/* Replace gray colors with BLUE palette */
+.bg-gray-100,
+.bg-gray-200 {
+	background-color: var(--blue-primary-light) !important;
+}
+
+.bg-gray-300,
+.bg-gray-400 {
+	background-color: var(--blue-tertiary-light) !important;
+}
+
+.bg-gray-700,
+.bg-gray-800,
+.bg-gray-900 {
+	background-color: var(--blue-primary) !important;
+}
+
+.text-gray-400,
+.text-gray-500 {
+	color: #6B7280 !important;
+}
+
+.text-gray-600,
+.text-gray-700 {
+	color: #4B5563 !important;
+}
+
+.text-gray-800,
+.text-gray-900 {
+	color: #1F2937 !important;
+}
+
+.border-gray-200,
+.border-gray-300 {
+	border-color: rgba(13, 110, 187, 0.15) !important;
+}
+
+/* Buttons and interactive elements */
+button:hover,
+a:hover {
+	transition: all 0.3s ease;
+}
+
+/* Accent colors for highlights */
+.accent-primary {
+	color: var(--blue-primary);
+}
+
+.accent-tertiary {
+	color: var(--blue-tertiary);
+}
+
+.bg-accent-primary {
+	background-color: var(--blue-primary);
+}
+
+.bg-accent-tertiary {
+	background-color: var(--blue-tertiary);
+}
