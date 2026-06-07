@@ -52,13 +52,13 @@ export default function Page() {
 					</div>
 					<div className="z-10 w-full absolute md:w-auto md:left-[10%] top-[60%] md:top-1/3 col-span-2 flex flex-col justify-center items-start md:items-start text-start px-10 pt-4 backdrop-filter backdrop-blur-sm md:backdrop-blur-none bg-gray-100 bg-opacity-50 md:bg-transparent md:pt-0">
 						<h1 className="md:bg-white bg-transparent lg:bg-transparent bg-opacity-50 md:px-0 text-[#0D6EBB] text-5xl md:text-8xl font-bold">
-							Qui Sommes-Nous ?
+						Notre histoire
 						</h1>
 						<Hr />
 						<p className="title text-xl mt-4 tracking-wider text-gray-900 leading-[1.7rem] mb-5 ">
-							Découvrez l'histoire de BLUE et notre{" "}
+						Depuis 2022, BLUE forme et{" "}
 							<span className="bg-transparent md:bg-gray-100 bg-opacity-50 xl:bg-transparent">
-								mission pour l'environnement.
+							engage les citoyens pour l'environnement.
 							</span>
 						</p>
 						<motion.div

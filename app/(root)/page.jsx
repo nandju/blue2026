@@ -11,7 +11,8 @@ import { FullPageWrapper, Section, useFullPage } from "@alvalens/react-fullpage-
 
 // components
 import Button from "@/components/Button";
-import Me from "@/public/ong_blue/images/logo.png";
+import Me from "@/public/ong_blue/images/illustrations/page-landing/action_1.jpg";
+// import Me from "@/public/ong_blue/images/logo.png";
 import MeAbout from "@/public/ong_blue/images/illustrations/page-landing/community-cleanup-volunteers-beach.jpg";
 import Setup from "@/public/ong_blue/images/illustrations/page-landing/ocean-conservation-initiative-blue.jpg";
 import ProjectAll from "@/public/ong_blue/images/illustrations/page-landing/sustainable-future-ocean-protection.jpg";
@@ -195,7 +196,7 @@ const MyPage = () => {
 								delay: 0.1,
 								type: "spring",
 							}}>
-							Qui Sommes-Nous ?
+							Notre histoire
 						</motion.h1>
 						<Hr />
 						<motion.p
@@ -206,7 +207,7 @@ const MyPage = () => {
 								delay: 0.2,
 								type: "spring",
 							}}>
-							Depuis notre création en janvier 2022, BLUE sensibilise et forme des citoyens engagés pour la protection de l'environnement. Nos actions incluent des collectes de déchets, des ateliers éducatifs et des projets de recyclage créatif.
+							Depuis 2022, BLUE forme et engage les citoyens pour l'environnement.
 						</motion.p>
 						<motion.div
 							initial={{ y: 40, opacity: 0 }}
@@ -273,10 +274,10 @@ const MyPage = () => {
 								delay: 0.2,
 								type: "spring",
 							}}>
-							Découvrez nos projets de sensibilisation, collecte de déchets plastiques,
+							Explorez nos actions : sensibilisation,
 							<span className="bg-transparent md:bg-gray-100 bg-opacity-50 xl:bg-transparent">
 								{" "}
-								reforestation et formation environnementale.
+								collecte de plastiques et formations.
 							</span>
 						</motion.p>
 						<motion.div
@@ -344,9 +345,9 @@ const MyPage = () => {
 								delay: 0.2,
 								type: "spring",
 							}}>
-							Rejoignez-nous dans notre mission pour un environnement plus propre.{" "}
+							Prêt à agir pour la planète ?{" "}
 							<span className="bg-transparent md:bg-gray-100 bg-opacity-50 xl:bg-transparent">
-								Contactez-nous pour devenir bénévole ou partenaire.
+							Rejoignez-nous comme bénévole ou partenaire.
 							</span>
 						</motion.p>
 						<motion.p
