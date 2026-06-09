@@ -411,6 +411,12 @@ export default function AdminDashboard() {
             </button>
           ))}
         </nav>
+        <div className="px-3 pb-2 border-t border-[rgba(13,110,187,0.08)] pt-2">
+          <Link href="/admin/chatbot"
+            className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-[#0D6EBB] bg-[rgba(13,110,187,0.06)] hover:bg-[rgba(13,110,187,0.12)] transition-colors">
+            <span>🤖</span> MR BLUE
+          </Link>
+        </div>
         <div className="p-3 border-t border-[rgba(13,110,187,0.08)]">
           <button onClick={handleLogout}
             className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-red-400 hover:bg-red-50 transition-colors">

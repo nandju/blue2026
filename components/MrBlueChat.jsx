@@ -1,287 +1,306 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { saveConversation } from "@/lib/store";
+import { addChatUser, getChatUserBySession, addChatMessage } from "@/lib/store";
 
 const SESSION_KEY = "mr_blue_session";
+const NORD = ["cocody", "yopougon", "abobo", "attécoubé", "attecoube", "anyama", "plateau", "bingerville"];
+const SUD  = ["marcory", "treichville", "koumassi", "port-bouet", "port-bouët"];
+const WA_NORD = "https://chat.whatsapp.com/CTyNHv6t1VJ22htKymlt4w";
+const WA_SUD  = "https://chat.whatsapp.com/Cl0LSqe35hBFjuLPPV13nm";
 
-const STEPS = ["greeting", "lastName", "firstName", "age", "location", "job", "motivation", "chat"];
-
-const KNOWLEDGE_BASE = [
-  {
-    keywords: ["bénévole", "rejoindre", "adhérer", "intégrer", "participer", "membre"],
-    response: "Pour rejoindre BLUE comme bénévole, voici les étapes :\n1️⃣ Remplissez notre formulaire en ligne sur notre site\n2️⃣ Participez à une séance de présentation\n3️⃣ Suivez la formation d'ambassadeur\n4️⃣ Intégrez votre équipe locale\n\n📱 Rejoignez notre groupe WhatsApp : +225 07 78 06 09 61\n📧 Email : blue@bluemakers.net",
-  },
-  {
-    keywords: ["programme", "projet", "initiative", "action", "activité"],
-    response: "BLUE mène plusieurs programmes clés :\n🌊 Collectes de nettoyage côtières et urbaines\n🎓 Formation d'ambassadeurs environnementaux\n♻️ Sensibilisation au recyclage dans les écoles\n🤝 Partenariats avec les entreprises et institutions\n🌿 Reforestation et protection des écosystèmes\n\nDécouvrez nos projets sur /projects",
-  },
-  {
-    keywords: ["whatsapp", "groupe", "chat", "message"],
-    response: "📱 Rejoignez nos groupes WhatsApp officiels BLUE :\n• Groupe principal : +225 07 78 06 09 61\n• Groupe bénévoles : contactez-nous par email\n\nVous pouvez également nous contacter directement sur WhatsApp au +225 07 78 06 09 61",
-  },
-  {
-    keywords: ["contact", "email", "téléphone", "appeler", "joindre"],
-    response: "📬 Nos coordonnées officielles :\n📧 Email : blue@bluemakers.net\n📱 WhatsApp / Tél : +225 07 78 06 09 61\n📍 Adresse : Abidjan, Côte d'Ivoire\n\n⏰ Nous répondons généralement sous 24h ouvrables.",
-  },
-  {
-    keywords: ["facebook", "instagram", "linkedin", "twitter", "social", "réseau"],
-    response: "🌐 Retrouvez BLUE sur les réseaux sociaux :\n📘 Facebook : facebook.com/bluemakers\n📸 Instagram : @bluemakers\n💼 LinkedIn : linkedin.com/company/bluemakers\n\nSuivez-nous pour rester informé de nos actions et événements !",
-  },
-  {
-    keywords: ["blue academy", "formation", "cours", "apprendre", "apprendre", "certification", "diplôme"],
-    response: "🎓 Blue Academy est notre plateforme de formation en ligne !\n\nVous pouvez y suivre des formations sur :\n• La pollution plastique\n• La formation d'ambassadeur\n• Le recyclage et l'économie circulaire\n\n🏆 À la fin de chaque formation, un certificat vous est délivré.\n\nAccédez à Blue Academy via /academy",
-  },
-  {
-    keywords: ["certificat", "diplôme", "attestation", "document"],
-    response: "🏆 BLUE délivre deux types de certificats :\n1. Certificat gratuit de participation (téléchargeable)\n2. Certificat officiel signé par le Président de BLUE (sur demande)\n\nPour obtenir un certificat officiel, complétez une formation sur Blue Academy avec un score ≥ 80%, puis faites une demande depuis votre tableau de résultats.",
-  },
-  {
-    keywords: ["don", "financement", "soutien", "sponsor", "partenaire"],
-    response: "💙 Merci pour votre intérêt à soutenir BLUE !\n\nPour les partenariats et dons :\n📧 blue@bluemakers.net\n📱 +225 07 78 06 09 61\n\nVotre soutien nous aide à former plus d'ambassadeurs et à organiser davantage d'actions environnementales.",
-  },
-  {
-    keywords: ["plastique", "pollution", "environnement", "océan", "déchet"],
-    response: "🌊 La lutte contre la pollution plastique est au cœur de la mission de BLUE.\n\nChaque année, 8 millions de tonnes de plastique finissent dans nos océans. En Côte d'Ivoire, BLUE agit pour :\n♻️ Réduire les déchets plastiques\n🎓 Former des ambassadeurs\n🤝 Sensibiliser les communautés\n\nRejoignez notre mouvement !",
-  },
-  {
-    keywords: ["blue", "qui", "organization", "ong", "histoire", "fondé"],
-    response: "💙 BLUE est une ONG ivoirienne fondée en janvier 2022 à Abidjan.\n\nNotre mission : lutter contre la pollution plastique en formant des ambassadeurs environnementaux et en mobilisant les communautés.\n\n🎯 Nos objectifs :\n• Former 1000 ambassadeurs d'ici 2025\n• Collecter 10 tonnes de plastique par an\n• Sensibiliser 100 000 personnes\n\nApprenez-en plus sur /about",
-  },
-];
-
-const FALLBACK =
-  "Je ne suis pas certain de comprendre votre question 🤔. Pour une aide personnalisée, contactez-nous directement :\n📧 blue@bluemakers.net\n📱 +225 07 78 06 09 61\n📘 facebook.com/bluemakers";
-
-function getResponse(message) {
-  const lower = message.toLowerCase();
-  for (const item of KNOWLEDGE_BASE) {
-    if (item.keywords.some((kw) => lower.includes(kw))) return item.response;
-  }
-  return FALLBACK;
+function getWhatsApp(location) {
+  if (!location) return null;
+  const l = location.toLowerCase();
+  if (NORD.some((c) => l.includes(c))) return { zone: "Abidjan Nord", link: WA_NORD };
+  if (SUD.some((c) => l.includes(c))) return { zone: "Abidjan Sud", link: WA_SUD };
+  return null;
 }
 
-function generateSessionId() {
+function genSession() {
   return `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 }
 
+const STEPS = [
+  { key: "lastName",   reply: (v) => `Merci ${v} ! Quel est votre prénom ?` },
+  { key: "firstName",  reply: ()  => "Quel est votre âge ?" },
+  { key: "age",        reply: ()  => "Dans quelle ville ou commune habitez-vous ?" },
+  { key: "location",   reply: ()  => "Quelle est votre profession ou fonction ?" },
+  { key: "job",        reply: ()  => "Quelle est votre motivation pour rejoindre BLUE ou en savoir plus sur nous ?" },
+  { key: "motivation", reply: null },
+];
+
+const PLACEHOLDERS = [
+  "Votre nom de famille...",
+  "Votre prénom...",
+  "Votre âge...",
+  "Votre ville / commune...",
+  "Votre profession...",
+  "Votre motivation...",
+];
+
+const formatText = (text) => {
+  if (!text) return null;
+  return text.split("\n").map((line, i, arr) => (
+    <span key={i}>
+      {line.split(/(https?:\/\/[^\s]+)/g).map((part, j) =>
+        /^https?:\/\//.test(part) ? (
+          <a key={j} href={part} target="_blank" rel="noopener noreferrer"
+            className="underline text-[#0DBD9F] break-all hover:opacity-80">{part}</a>
+        ) : part
+      )}
+      {i < arr.length - 1 && <br />}
+    </span>
+  ));
+};
+
 export default function MrBlueChat() {
-  const [isOpen, setIsOpen] = useState(false);
-  const [step, setStep] = useState(0);
-  const [messages, setMessages] = useState([]);
-  const [input, setInput] = useState("");
-  const [isTyping, setIsTyping] = useState(false);
-  const [userInfo, setUserInfo] = useState({ lastName: "", firstName: "", age: "", location: "", job: "", motivation: "" });
+  const [isOpen,      setIsOpen]      = useState(false);
+  const [messages,    setMessages]    = useState([]);
+  const [step,        setStep]        = useState(0);
+  const [onboardDone, setOnboardDone] = useState(false);
+  const [userInfo,    setUserInfo]    = useState({ lastName: "", firstName: "", age: "", location: "", job: "", motivation: "" });
+  const [localTyping, setLocalTyping] = useState(false);
+  const [isStreaming, setIsStreaming] = useState(false);
+  const [input,       setInput]       = useState("");
+
+  const userIdRef   = useRef(null);
+  const aiConvRef   = useRef([]);
+  const initialized = useRef(false);
+  const inputRef    = useRef(null);
+  const endRef      = useRef(null);
+  const abortRef    = useRef(null);
+
   const [sessionId] = useState(() => {
-    if (typeof window === "undefined") return generateSessionId();
-    const saved = sessionStorage.getItem(SESSION_KEY);
-    if (saved) return saved;
-    const id = generateSessionId();
+    if (typeof window === "undefined") return genSession();
+    const s = sessionStorage.getItem(SESSION_KEY);
+    if (s) return s;
+    const id = genSession();
     sessionStorage.setItem(SESSION_KEY, id);
     return id;
   });
-  const messagesEndRef = useRef(null);
 
-  const scrollToBottom = () => messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  useEffect(() => { endRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages, localTyping]);
 
-  useEffect(() => { scrollToBottom(); }, [messages]);
+  const uid = () => `${Date.now()}_${Math.random()}`;
 
-  const addBotMessage = (text, delay = 800) => {
-    setIsTyping(true);
-    setTimeout(() => {
-      setIsTyping(false);
-      setMessages((prev) => [...prev, { from: "bot", text, time: new Date() }]);
-    }, delay);
+  const pushMsg = (role, content, extra = {}) => {
+    const msg = { id: uid(), role, content, time: new Date(), ...extra };
+    setMessages((p) => [...p, msg]);
+    return msg.id;
   };
 
+  const botDelay = (text, delay = 800) =>
+    new Promise((res) => {
+      setLocalTyping(true);
+      setTimeout(() => {
+        setLocalTyping(false);
+        pushMsg("assistant", text);
+        res();
+      }, delay);
+    });
+
   useEffect(() => {
-    if (isOpen && messages.length === 0) {
-      addBotMessage(
-        "Bonjour ! Je suis MR BLUE 🌊, votre assistant officiel BLUE.\n\nJe suis là pour répondre à vos questions sur notre organisation, nos programmes et nos opportunités de bénévolat.\n\nPour personnaliser notre conversation, j'aurais besoin de quelques informations. Quel est votre nom de famille ?",
-        600
-      );
+    if (!isOpen || initialized.current) return;
+    initialized.current = true;
+    const existing = getChatUserBySession(sessionId);
+    if (existing) {
+      userIdRef.current = existing.id;
+      setUserInfo({ lastName: existing.lastName, firstName: existing.firstName, age: existing.age, location: existing.location, job: existing.job, motivation: existing.motivation });
+      setOnboardDone(true);
+      botDelay(`Bon retour ${existing.firstName} ! 👋\n\nJe suis MR BLUE, votre assistant officiel BLUE.\nComment puis-je vous aider aujourd'hui ?`, 600);
+    } else {
+      botDelay("Bonjour 👋 et bienvenue chez BLUE.\n\nJe suis MR BLUE, votre assistant de recrutement et d'information.\n\nAvant de poursuivre, j'aimerais apprendre à vous connaître afin de mieux vous accompagner.\n\nQuel est votre nom de famille ?", 600);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
 
-  const persistConversation = (msgs, info) => {
-    saveConversation({ sessionId, userInfo: info, messages: msgs });
+  useEffect(() => {
+    if (isOpen) setTimeout(() => inputRef.current?.focus(), 350);
+  }, [isOpen]);
+
+  const handleOnboarding = async (val, info) => {
+    const s = STEPS[step];
+    const newInfo = { ...info, [s.key]: val };
+    setUserInfo(newInfo);
+
+    if (step < STEPS.length - 1) {
+      setStep((n) => n + 1);
+      await botDelay(s.reply(val));
+    } else {
+      setStep((n) => n + 1);
+      const uid2 = addChatUser({ ...newInfo, sessionId });
+      userIdRef.current = uid2;
+      await botDelay(`Merci beaucoup ${newInfo.firstName} ! 🙏\n\nJe suis maintenant prêt à répondre à toutes vos questions sur BLUE, nos programmes, nos formations ou comment nous rejoindre.\n\nComment puis-je vous aider aujourd'hui ?`, 1000);
+      const wa = getWhatsApp(newInfo.location);
+      if (wa) {
+        setTimeout(() => {
+          setMessages((p) => [...p, { id: uid(), role: "assistant", content: `🌍 Vous appartenez à la zone **${wa.zone}**.\n\nVoici votre groupe officiel BLUE :`, time: new Date(), waLink: wa.link, waZone: wa.zone }]);
+        }, 2400);
+      }
+      setOnboardDone(true);
+    }
+  };
+
+  const streamAI = async (userMessage, info) => {
+    setIsStreaming(true);
+    const msgId = uid();
+    setMessages((p) => [...p, { id: msgId, role: "assistant", content: "", time: new Date(), streaming: true }]);
+
+    aiConvRef.current = [...aiConvRef.current, { role: "user", content: userMessage }];
+
+    try {
+      abortRef.current = new AbortController();
+      const resp = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ messages: aiConvRef.current, userInfo: info }),
+        signal: abortRef.current.signal,
+      });
+      if (!resp.ok) throw new Error("API error");
+
+      const reader  = resp.body.getReader();
+      const decoder = new TextDecoder();
+      let aiText = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        aiText += decoder.decode(value, { stream: true });
+        setMessages((p) => p.map((m) => m.id === msgId ? { ...m, content: aiText } : m));
+      }
+
+      setMessages((p) => p.map((m) => m.id === msgId ? { ...m, streaming: false } : m));
+      aiConvRef.current = [...aiConvRef.current, { role: "assistant", content: aiText }];
+      if (userIdRef.current) addChatMessage(userIdRef.current, userMessage, aiText);
+
+    } catch (e) {
+      if (e.name !== "AbortError") {
+        setMessages((p) => p.map((m) => m.id === msgId ? { ...m, content: "Désolé, je rencontre un problème technique.\nContactez-nous directement :\n📧 blue@bluemakers.net\n📞 +225 0778060961", streaming: false } : m));
+      }
+    } finally {
+      setIsStreaming(false);
+    }
   };
 
   const handleSend = () => {
     const trimmed = input.trim();
-    if (!trimmed) return;
-    const userMsg = { from: "user", text: trimmed, time: new Date() };
-    const newMessages = [...messages, userMsg];
-    setMessages(newMessages);
+    if (!trimmed || localTyping || isStreaming) return;
+    const snap = { ...userInfo };
     setInput("");
-
-    const currentStep = STEPS[step];
-
-    if (currentStep === "lastName") {
-      const info = { ...userInfo, lastName: trimmed };
-      setUserInfo(info);
-      setStep((s) => s + 1);
-      persistConversation(newMessages, info);
-      addBotMessage(`Merci ${trimmed} ! Et votre prénom ?`);
-    } else if (currentStep === "firstName") {
-      const info = { ...userInfo, firstName: trimmed };
-      setUserInfo(info);
-      setStep((s) => s + 1);
-      persistConversation(newMessages, info);
-      addBotMessage("Quel est votre âge ?");
-    } else if (currentStep === "age") {
-      const info = { ...userInfo, age: trimmed };
-      setUserInfo(info);
-      setStep((s) => s + 1);
-      persistConversation(newMessages, info);
-      addBotMessage("Où êtes-vous situé(e) ? (Ville / Pays)");
-    } else if (currentStep === "location") {
-      const info = { ...userInfo, location: trimmed };
-      setUserInfo(info);
-      setStep((s) => s + 1);
-      persistConversation(newMessages, info);
-      addBotMessage("Quel est votre poste ou votre profession ?");
-    } else if (currentStep === "job") {
-      const info = { ...userInfo, job: trimmed };
-      setUserInfo(info);
-      setStep((s) => s + 1);
-      persistConversation(newMessages, info);
-      addBotMessage("Quelle est votre motivation pour rejoindre BLUE ou en savoir plus sur nous ?");
-    } else if (currentStep === "motivation") {
-      const info = { ...userInfo, motivation: trimmed };
-      setUserInfo(info);
-      setStep((s) => s + 1);
-      persistConversation(newMessages, info);
-      addBotMessage(
-        `Merci beaucoup ${userInfo.firstName || trimmed} ! 🙏\n\nJe suis maintenant prêt à répondre à toutes vos questions sur BLUE, nos programmes, nos formations ou comment nous rejoindre.\n\nComment puis-je vous aider aujourd'hui ?`,
-        1000
-      );
-    } else if (currentStep === "chat") {
-      const response = getResponse(trimmed);
-      persistConversation(newMessages, userInfo);
-      addBotMessage(response, 1000);
+    pushMsg("user", trimmed);
+    if (!onboardDone) {
+      handleOnboarding(trimmed, snap);
+    } else {
+      streamAI(trimmed, snap);
     }
   };
 
-  const handleKeyDown = (e) => {
+  const handleKey = (e) => {
     if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); }
   };
 
-  const formatText = (text) =>
-    text.split("\n").map((line, i) => (
-      <span key={i}>{line}{i < text.split("\n").length - 1 && <br />}</span>
-    ));
+  const placeholder = onboardDone
+    ? "Posez votre question à MR BLUE..."
+    : PLACEHOLDERS[Math.min(step, PLACEHOLDERS.length - 1)];
 
-  const getPlaceholder = () => {
-    const s = STEPS[step];
-    if (s === "lastName") return "Votre nom de famille...";
-    if (s === "firstName") return "Votre prénom...";
-    if (s === "age") return "Votre âge...";
-    if (s === "location") return "Votre ville / pays...";
-    if (s === "job") return "Votre poste / profession...";
-    if (s === "motivation") return "Votre motivation...";
-    return "Posez votre question...";
-  };
+  const showDots = localTyping || (isStreaming && messages.length > 0 && messages[messages.length - 1]?.role === "user");
 
   return (
     <>
-      {/* Floating Button */}
       <motion.button
         onClick={() => setIsOpen((o) => !o)}
         className="fixed bottom-6 right-6 z-[100] w-16 h-16 rounded-full bg-[#0D6EBB] text-white shadow-2xl flex items-center justify-center"
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.95 }}
+        whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}
         aria-label="Ouvrir MR BLUE">
         <AnimatePresence mode="wait">
-          {isOpen ? (
-            <motion.span key="close" initial={{ rotate: -90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: 90, opacity: 0 }} className="text-2xl font-bold">✕</motion.span>
-          ) : (
-            <motion.span key="open" initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0 }} className="text-2xl font-bold">💬</motion.span>
-          )}
+          {isOpen
+            ? <motion.span key="x" initial={{ rotate: -90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: 90, opacity: 0 }} className="text-2xl font-bold">✕</motion.span>
+            : <motion.span key="c" initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0 }} className="text-2xl font-bold">💬</motion.span>
+          }
         </AnimatePresence>
       </motion.button>
 
-      {/* Chat Window */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            initial={{ opacity: 0, y: 60, scale: 0.9 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 60, scale: 0.9 }}
+            initial={{ opacity: 0, y: 60, scale: 0.9 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 60, scale: 0.9 }}
             transition={{ type: "spring", stiffness: 300, damping: 28 }}
             className="fixed bottom-24 right-6 z-[100] w-[360px] max-w-[calc(100vw-2rem)] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden border border-[rgba(13,110,187,0.15)]"
             style={{ height: "520px" }}>
 
             {/* Header */}
-            <div className="bg-[#0D6EBB] px-5 py-4 flex items-center gap-3">
+            <div className="bg-[#0D6EBB] px-5 py-4 flex items-center gap-3 flex-shrink-0">
               <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center text-[#0D6EBB] font-bold text-lg">MB</div>
               <div>
                 <p className="text-white font-bold text-sm">MR BLUE</p>
                 <p className="text-blue-200 text-xs">Assistant officiel BLUE</p>
               </div>
               <div className="ml-auto flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-[#0DBD9F] inline-block"></span>
+                <span className="w-2 h-2 rounded-full bg-[#0DBD9F] animate-pulse inline-block" />
                 <span className="text-white text-xs">En ligne</span>
               </div>
             </div>
 
             {/* Messages */}
             <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-[#f7faff]">
-              {messages.map((msg, i) => (
-                <motion.div
-                  key={i}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className={`flex ${msg.from === "user" ? "justify-end" : "justify-start"}`}>
-                  <div
-                    className={`max-w-[80%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed ${
-                      msg.from === "user"
-                        ? "bg-[#0D6EBB] text-white rounded-br-sm"
-                        : "bg-white text-gray-800 rounded-bl-sm shadow-sm border border-[rgba(13,110,187,0.08)]"
-                    }`}>
-                    {formatText(msg.text)}
+              {messages.map((msg) => (
+                <motion.div key={msg.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
+                  className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
+                  <div className={`max-w-[82%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed ${
+                    msg.role === "user"
+                      ? "bg-[#0D6EBB] text-white rounded-br-sm"
+                      : "bg-white text-gray-800 rounded-bl-sm shadow-sm border border-[rgba(13,110,187,0.08)]"
+                  }`}>
+                    {msg.waLink ? (
+                      <div>
+                        {formatText(msg.content)}
+                        <a href={msg.waLink} target="_blank" rel="noopener noreferrer"
+                          className="mt-2 flex items-center gap-2 bg-[#25D366] text-white rounded-xl px-3 py-2 text-xs font-semibold hover:bg-[#20c05c] transition-colors">
+                          <span>📱</span> Rejoindre {msg.waZone}
+                        </a>
+                      </div>
+                    ) : (
+                      <>
+                        {formatText(msg.content)}
+                        {msg.streaming && msg.content && (
+                          <span className="inline-block w-1.5 h-3.5 bg-[#0D6EBB] ml-0.5 animate-pulse align-middle rounded-sm" />
+                        )}
+                      </>
+                    )}
                   </div>
                 </motion.div>
               ))}
-              {isTyping && (
+              {showDots && (
                 <div className="flex justify-start">
                   <div className="bg-white rounded-2xl rounded-bl-sm px-4 py-3 shadow-sm border border-[rgba(13,110,187,0.08)]">
                     <div className="flex gap-1 items-center h-4">
                       {[0, 1, 2].map((i) => (
                         <motion.div key={i} className="w-2 h-2 rounded-full bg-[#0D6EBB]"
-                          animate={{ y: [0, -4, 0] }}
-                          transition={{ duration: 0.6, repeat: Infinity, delay: i * 0.15 }} />
+                          animate={{ y: [0, -4, 0] }} transition={{ duration: 0.6, repeat: Infinity, delay: i * 0.15 }} />
                       ))}
                     </div>
                   </div>
                 </div>
               )}
-              <div ref={messagesEndRef} />
+              <div ref={endRef} />
             </div>
 
             {/* Input */}
-            <div className="p-3 bg-white border-t border-[rgba(13,110,187,0.1)]">
+            <div className="p-3 bg-white border-t border-[rgba(13,110,187,0.1)] flex-shrink-0">
               <div className="flex items-center gap-2">
-                <input
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  onKeyDown={handleKeyDown}
-                  placeholder={getPlaceholder()}
-                  className="flex-1 bg-[#f7faff] rounded-full px-4 py-2 text-sm outline-none border border-[rgba(13,110,187,0.15)] focus:border-[#0D6EBB] transition-colors"
-                />
-                <motion.button
-                  onClick={handleSend}
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.9 }}
-                  disabled={!input.trim()}
-                  className="w-10 h-10 rounded-full bg-[#0D6EBB] text-white flex items-center justify-center disabled:opacity-40 transition-opacity">
+                <input ref={inputRef} value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={handleKey}
+                  placeholder={placeholder} disabled={localTyping || isStreaming}
+                  className="flex-1 bg-[#f7faff] rounded-full px-4 py-2 text-sm outline-none border border-[rgba(13,110,187,0.15)] focus:border-[#0D6EBB] transition-colors disabled:opacity-60" />
+                <motion.button onClick={handleSend} whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}
+                  disabled={!input.trim() || localTyping || isStreaming}
+                  className="w-10 h-10 rounded-full bg-[#0D6EBB] text-white flex items-center justify-center disabled:opacity-40 transition-opacity flex-shrink-0">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                     <line x1="22" y1="2" x2="11" y2="13" /><polygon points="22 2 15 22 11 13 2 9 22 2" />
                   </svg>
                 </motion.button>
               </div>
-              <p className="text-center text-[10px] text-gray-400 mt-2">Propulsé par BLUE 🌊</p>
+              <p className="text-center text-[10px] text-gray-400 mt-2">Propulsé par BLUE 🌊 · IA Gemini</p>
             </div>
           </motion.div>
         )}
