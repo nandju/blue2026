@@ -1,12 +1,11 @@
 import "./globals.css";
 import { Outfit } from "next/font/google";
-import Navbar from "@/components/Navbar";
 import { config } from "@fortawesome/fontawesome-svg-core";
 import "@fortawesome/fontawesome-svg-core/styles.css";
 config.autoAddCss = false;
 import { Analytics } from "@vercel/analytics/react";
-import Chat from "@/components/Chat";
 import ClientTopProgressBar from "@/components/ClientTopProgressBar";
+import ClientLayoutWrapper from "@/components/ClientLayoutWrapper";
 
 const outfit = Outfit({
 	subsets: ["latin"],
@@ -90,9 +89,9 @@ export default function RootLayout({ children }) {
 					dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
 				/>
 				<ClientTopProgressBar />
-				<Navbar />
-				{children}
-				<Chat />
+				<ClientLayoutWrapper>
+					{children}
+				</ClientLayoutWrapper>
 				<Analytics />
 			</body>
 		</html>

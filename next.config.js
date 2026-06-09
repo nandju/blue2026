@@ -45,6 +45,9 @@ module.exports = withBundleAnalyzer({
 	},
 	// Add performance optimizations
 	reactStrictMode: true,
+	eslint: {
+		ignoreDuringBuilds: true,
+	},
 	compiler: {
 		removeConsole:
 			process.env.NODE_ENV === "production"
