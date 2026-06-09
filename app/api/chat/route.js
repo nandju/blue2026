@@ -1,4 +1,4 @@
-import { google } from "@ai-sdk/google";
+import { groq } from "@ai-sdk/groq";
 import { streamText } from "ai";
 
 export const maxDuration = 30;
@@ -91,7 +91,7 @@ export async function POST(req) {
     : "";
 
   const result = await streamText({
-    model: google("gemini-2.5-flash"),
+    model: groq("llama-3.3-70b-versatile"),
     system: SYSTEM_PROMPT + userContext,
     messages,
     maxTokens: 600,

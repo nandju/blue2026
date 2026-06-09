@@ -197,6 +197,7 @@ export default function MrBlueChat() {
   };
 
   const handleKey = (e) => {
+    e.stopPropagation();
     if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); }
   };
 
