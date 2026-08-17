@@ -2,10 +2,16 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
+import Image from "next/image";
 import { getCourses } from "@/lib/store";
+import Button from "@/components/Button";
+import Hr from "@/components/Hr";
 import FixedButton from "@/components/FixedButton";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronLeft } from "@fortawesome/free-solid-svg-icons";
+
+// images
+import AcademyHero from "@/public/ong_blue/images/illustrations/page-landing/blue_training_1.png";
 
 const CATEGORIES = ["Tous", "environnement", "formation"];
 const LEVELS = ["Tous niveaux", "Débutant", "Intermédiaire", "Avancé"];
@@ -34,55 +40,88 @@ export default function AcademyPage() {
     return matchSearch && matchCat && matchLevel;
   });
 
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   return (
     <main className="min-h-screen bg-white overflow-x-hidden">
-      <FixedButton href="/">
+      <FixedButton href="/#academy">
         <FontAwesomeIcon icon={faChevronLeft} className="text-black pr-10" />
       </FixedButton>
 
       {/* Hero */}
-      <section className="relative bg-gradient-to-br from-[#0D6EBB] to-[#0a5a9a] pt-28 pb-20 px-6 overflow-hidden">
-        <div className="absolute inset-0 opacity-10">
-          {[...Array(6)].map((_, i) => (
-            <div key={i} className="absolute rounded-full border-2 border-white"
-              style={{ width: `${120 + i * 80}px`, height: `${120 + i * 80}px`, top: `${10 + i * 8}%`, right: `${-10 + i * 5}%`, opacity: 0.4 - i * 0.05 }} />
-          ))}
-        </div>
-        <div className="relative max-w-4xl mx-auto text-center">
-          <motion.p
-            className="text-[#0DBD9F] uppercase tracking-[0.4rem] text-sm font-medium mb-3"
-            initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-            BLUE
-          </motion.p>
-          <motion.h1
-            className="text-white text-5xl md:text-7xl font-bold mb-4"
-            initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2, type: "spring" }}>
-            Blue Academy
-          </motion.h1>
-          <motion.p
-            className="text-white/80 text-lg md:text-xl max-w-2xl mx-auto leading-relaxed"
-            initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
-            Formez-vous gratuitement sur l&apos;environnement, devenez ambassadeur et obtenez un certificat reconnu par BLUE.
-          </motion.p>
-          {/* Stats */}
+      <div className="relative h-screen w-screen  gap-4 p-10 flex justify-center items-center flex-col mb-10 overflow-hidden">
+        <div className="z-0 mb-48 md:mb-0  md:absolute top-1/4  md:right-[10%] md:-translate-y-16 ">
           <motion.div
-            className="flex justify-center gap-8 mt-10"
-            initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}>
-            {[["Formations", courses.length], ["Certifications", "Gratuites"], ["Accès", "100% en ligne"]].map(([label, val]) => (
-              <div key={label} className="text-center">
-                <p className="text-white text-2xl font-bold">{val}</p>
-                <p className="text-white/60 text-xs uppercase tracking-wider mt-0.5">{label}</p>
-              </div>
-            ))}
+            initial={{ scale: 1 }}
+            animate={{ scale: 1.6 }}
+            transition={{ duration: 1, ease: "circOut" }}
+            className="relative bg-slate-300 rounded-sm h-[400px] md:h-[600px] w-[80vw] md:w-[30vw] grayscale hover:grayscale-0 ">
+            <Image
+              src={AcademyHero}
+              alt="Blue Academy"
+              fill
+              placeholder="blur"
+              className="object-cover"
+              sizes="(max-width: 768px) 80vw, 30vw"
+            />
           </motion.div>
         </div>
-      </section>
+        <div className="z-10 w-full absolute md:w-auto md:left-[10%] top-[60%] md:top-1/3 col-span-2 flex flex-col justify-center items-start md:items-start text-start px-10 pt-4 backdrop-filter backdrop-blur-sm md:backdrop-blur-none md:backdrop-filter-none bg-gray-100 bg-opacity-50 md:bg-transparent md:pt-0">
+          <h1 className="md:bg-white bg-transparent lg:bg-transparent bg-opacity-50 md-px-0 text-[#0D6EBB] text-5xl md:text-8xl font-bold">
+            Blue Academy
+          </h1>
+          <Hr />
+          <p className="title  text-xl mt-4 tracking-wider text-gray-900 leading-[1.7rem] mb-5">
+            Formez-vous gratuitement, devenez ambassadeur et{" "}
+            <span className="bg-transparent md:bg-gray-100 bg-opacity-50 xl:bg-transparent">
+              obtenez un certificat reconnu par BLUE.
+            </span>
+          </p>
+          <motion.div
+            initial={{ opacity: 0, y: 100 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, ease: "circOut" }}
+            onClick={() => {
+              window.scrollTo({
+                top: 1000,
+                behavior: "smooth",
+              });
+            }}
+            className="mb-3">
+            <Button variation="primary">Défiler</Button>
+          </motion.div>
+        </div>
+      </div>
+
+      {/* Section title */}
+      <div className="mt-10 flex flex-col justify-start items-center w-full pl-10 md:pl-32">
+        <div className="flex justify-center items-center flex-col my-5 self-start ">
+          <Hr variant="long"></Hr>
+          <h1 className="text-3xl font-bold mt-3 text-[#0D6EBB]">Nos Formations</h1>
+        </div>
+      </div>
+
+      {/* Stats */}
+      <motion.div
+        className="flex justify-center flex-wrap gap-8 md:gap-16 my-8 px-10"
+        initial={{ opacity: 0, y: 30 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        transition={{ type: "spring" }}>
+        {[["Formations", courses.length], ["Certifications", "Gratuites"], ["Accès", "100% en ligne"]].map(([label, val]) => (
+          <div key={label} className="text-center">
+            <p className="text-[#0D6EBB] text-3xl font-bold">{val}</p>
+            <p className="text-gray-400 text-xs uppercase tracking-wider mt-1">{label}</p>
+          </div>
+        ))}
+      </motion.div>
 
       {/* Search & Filters */}
-      <section className="max-w-5xl mx-auto px-6 -mt-6 mb-10">
+      <section className="max-w-5xl mx-auto px-6 mb-10">
         <motion.div
           className="bg-white rounded-2xl shadow-lg p-5 border border-[rgba(13,110,187,0.1)]"
-          initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
+          initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} transition={{ type: "spring" }}>
           <div className="flex flex-col md:flex-row gap-4">
             {/* Search */}
             <div className="flex-1 relative">

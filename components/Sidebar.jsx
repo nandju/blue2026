@@ -4,6 +4,7 @@ import {
 	faHome,
 	faUser,
 	faFolderOpen,
+	faGraduationCap,
 	faEnvelope,
 } from "@fortawesome/free-solid-svg-icons";
 import { useFullPage } from "@alvalens/react-fullpage-snap";
@@ -13,6 +14,7 @@ const navItems = [
 	{ icon: faHome, label: "Go to Home section", anchor: "home" },
 	{ icon: faUser, label: "Go to About section", anchor: "about" },
 	{ icon: faFolderOpen, label: "Go to Projects section", anchor: "projects" },
+	{ icon: faGraduationCap, label: "Go to Blue Academy section", anchor: "academy" },
 	{ icon: faEnvelope, label: "Go to Contact section", anchor: "contact" },
 ];
 

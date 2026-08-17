@@ -43,16 +43,29 @@ const formatText = (text) => {
   if (!text) return null;
   return text.split("\n").map((line, i, arr) => (
     <span key={i}>
-      {line.split(/(https?:\/\/[^\s]+)/g).map((part, j) =>
-        /^https?:\/\//.test(part) ? (
-          <a key={j} href={part} target="_blank" rel="noopener noreferrer"
-            className="underline text-[#0DBD9F] break-all hover:opacity-80">{part}</a>
-        ) : part
-      )}
+      {line.split(/(https?:\/\/[^\s]+|\*\*[^*]+\*\*)/g).map((part, j) => {
+        if (/^https?:\/\//.test(part)) {
+          return (
+            <a key={j} href={part} target="_blank" rel="noopener noreferrer"
+              className="underline text-[#0DBD9F] break-all hover:opacity-80">{part}</a>
+          );
+        }
+        if (/^\*\*[^*]+\*\*$/.test(part)) {
+          return <strong key={j}>{part.slice(2, -2)}</strong>;
+        }
+        return part;
+      })}
       {i < arr.length - 1 && <br />}
     </span>
   ));
 };
+
+const SUGGESTIONS = [
+  "Comment devenir bénévole ?",
+  "Quelles sont vos formations ?",
+  "Quels sont vos projets ?",
+  "Comment vous contacter ?",
+];
 
 export default function MrBlueChat() {
   const [isOpen,      setIsOpen]      = useState(false);
@@ -206,21 +219,47 @@ export default function MrBlueChat() {
     : PLACEHOLDERS[Math.min(step, PLACEHOLDERS.length - 1)];
 
   const showDots = localTyping || (isStreaming && messages.length > 0 && messages[messages.length - 1]?.role === "user");
+  const showSuggestions = onboardDone && !localTyping && !isStreaming && messages.length > 0 && messages[messages.length - 1]?.role === "assistant" && aiConvRef.current.length === 0;
+
+  const sendSuggestion = (text) => {
+    if (localTyping || isStreaming) return;
+    pushMsg("user", text);
+    streamAI(text, { ...userInfo });
+  };
 
   return (
     <>
       <motion.button
         onClick={() => setIsOpen((o) => !o)}
-        className="fixed bottom-6 right-6 z-[100] w-16 h-16 rounded-full bg-[#0D6EBB] text-white shadow-2xl flex items-center justify-center"
+        className="fixed bottom-6 right-6 z-[100] w-16 h-16 rounded-full bg-gradient-to-br from-[#0D6EBB] to-[#0DBD9F] text-white shadow-2xl flex items-center justify-center"
         whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}
         aria-label="Ouvrir MR BLUE">
+        {!isOpen && (
+          <motion.span
+            className="absolute inset-0 rounded-full bg-[#0D6EBB]"
+            animate={{ scale: [1, 1.35], opacity: [0.4, 0] }}
+            transition={{ duration: 1.8, repeat: Infinity, ease: "easeOut" }}
+          />
+        )}
         <AnimatePresence mode="wait">
           {isOpen
-            ? <motion.span key="x" initial={{ rotate: -90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: 90, opacity: 0 }} className="text-2xl font-bold">✕</motion.span>
-            : <motion.span key="c" initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0 }} className="text-2xl font-bold">💬</motion.span>
+            ? <motion.span key="x" initial={{ rotate: -90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: 90, opacity: 0 }} className="relative text-2xl font-bold">✕</motion.span>
+            : <motion.span key="c" initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0 }} className="relative text-2xl font-bold">💬</motion.span>
           }
         </AnimatePresence>
       </motion.button>
+
+      <AnimatePresence>
+        {!isOpen && (
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0, transition: { delay: 2 } }}
+            exit={{ opacity: 0, x: 20 }}
+            className="fixed bottom-10 right-24 z-[99] bg-white text-[#0D6EBB] text-xs font-semibold px-4 py-2 rounded-full shadow-lg border border-[rgba(13,110,187,0.15)] pointer-events-none hidden md:block">
+            Discutez avec MR BLUE 👋
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <AnimatePresence>
         {isOpen && (
@@ -231,26 +270,51 @@ export default function MrBlueChat() {
             style={{ height: "520px" }}>
 
             {/* Header */}
-            <div className="bg-[#0D6EBB] px-5 py-4 flex items-center gap-3 flex-shrink-0">
-              <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center text-[#0D6EBB] font-bold text-lg">MB</div>
-              <div>
+            <div className="relative bg-gradient-to-r from-[#0D6EBB] to-[#0a5a9a] px-5 py-4 flex items-center gap-3 flex-shrink-0 overflow-hidden">
+              <motion.div
+                className="absolute -top-10 -right-10 w-32 h-32 rounded-full bg-[#0DBD9F] opacity-20"
+                animate={{ scale: [1, 1.2, 1] }}
+                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+              />
+              <motion.div
+                className="relative w-10 h-10 rounded-full bg-white flex items-center justify-center text-[#0D6EBB] font-bold text-lg shadow-md"
+                animate={{ y: [0, -3, 0] }}
+                transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}>
+                MB
+              </motion.div>
+              <div className="relative">
                 <p className="text-white font-bold text-sm">MR BLUE</p>
                 <p className="text-blue-200 text-xs">Assistant officiel BLUE</p>
               </div>
-              <div className="ml-auto flex items-center gap-1.5">
+              <div className="relative ml-auto flex items-center gap-1.5">
                 <span className="w-2 h-2 rounded-full bg-[#0DBD9F] animate-pulse inline-block" />
                 <span className="text-white text-xs">En ligne</span>
               </div>
             </div>
 
+            {/* Onboarding progress */}
+            {!onboardDone && (
+              <div className="h-1 bg-[rgba(13,110,187,0.1)] flex-shrink-0">
+                <motion.div
+                  className="h-full bg-gradient-to-r from-[#0D6EBB] to-[#0DBD9F]"
+                  initial={{ width: 0 }}
+                  animate={{ width: `${(step / STEPS.length) * 100}%` }}
+                  transition={{ type: "spring", stiffness: 120, damping: 20 }}
+                />
+              </div>
+            )}
+
             {/* Messages */}
             <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-[#f7faff]">
               {messages.map((msg) => (
-                <motion.div key={msg.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
+                <motion.div key={msg.id}
+                  initial={{ opacity: 0, y: 14, scale: 0.96 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  transition={{ type: "spring", stiffness: 260, damping: 22 }}
                   className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
                   <div className={`max-w-[82%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed ${
                     msg.role === "user"
-                      ? "bg-[#0D6EBB] text-white rounded-br-sm"
+                      ? "bg-gradient-to-br from-[#0D6EBB] to-[#0a5a9a] text-white rounded-br-sm shadow-md"
                       : "bg-white text-gray-800 rounded-bl-sm shadow-sm border border-[rgba(13,110,187,0.08)]"
                   }`}>
                     {msg.waLink ? (
@@ -272,6 +336,26 @@ export default function MrBlueChat() {
                   </div>
                 </motion.div>
               ))}
+              {showSuggestions && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="flex flex-wrap gap-2 pt-1">
+                  {SUGGESTIONS.map((s, i) => (
+                    <motion.button
+                      key={s}
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ delay: 0.15 + i * 0.08 }}
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => sendSuggestion(s)}
+                      className="text-xs text-[#0D6EBB] bg-white border border-[rgba(13,110,187,0.25)] rounded-full px-3 py-1.5 hover:bg-[#0D6EBB] hover:text-white transition-colors shadow-sm">
+                      {s}
+                    </motion.button>
+                  ))}
+                </motion.div>
+              )}
               {showDots && (
                 <div className="flex justify-start">
                   <div className="bg-white rounded-2xl rounded-bl-sm px-4 py-3 shadow-sm border border-[rgba(13,110,187,0.08)]">
