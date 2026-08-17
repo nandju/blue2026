@@ -6,9 +6,6 @@ import Image from "next/image";
 import { getCourses } from "@/lib/store";
 import Button from "@/components/Button";
 import Hr from "@/components/Hr";
-import FixedButton from "@/components/FixedButton";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faChevronLeft } from "@fortawesome/free-solid-svg-icons";
 
 // images
 import AcademyHero from "@/public/ong_blue/images/illustrations/page-landing/blue_training_1.png";
@@ -46,10 +43,6 @@ export default function AcademyPage() {
 
   return (
     <main className="min-h-screen bg-white overflow-x-hidden">
-      <FixedButton href="/#academy">
-        <FontAwesomeIcon icon={faChevronLeft} className="text-black pr-10" />
-      </FixedButton>
-
       {/* Hero */}
       <div className="relative h-screen w-screen  gap-4 p-10 flex justify-center items-center flex-col mb-10 overflow-hidden">
         <div className="z-0 mb-48 md:mb-0  md:absolute top-1/4  md:right-[10%] md:-translate-y-16 ">
