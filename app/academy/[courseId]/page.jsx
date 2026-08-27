@@ -4,7 +4,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import {
-  getCourse,
   isRegistered,
   addRegistration,
   getRegistration,

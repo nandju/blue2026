@@ -1,8 +1,9 @@
 const projects = require("./json/data.json");
+const { getCourses } = require("./lib/store");
 
 /** @type {import('next-sitemap').IConfig} */
 module.exports = {
-	siteUrl: process.env.NEXT_PUBLIC_SITE_URL || "https://www.alvalens.my.id",
+	siteUrl: process.env.NEXT_PUBLIC_SITE_URL || "https://www.bluemakers.net",
 	generateRobotsTxt: true,
 	generateIndexSitemap: false,
 	exclude: ["/404", "/500"],
@@ -13,6 +14,7 @@ module.exports = {
 			{ path: "/about", priority: 0.9, changefreq: "weekly" },
 			{ path: "/projects", priority: 0.9, changefreq: "weekly" },
 			{ path: "/projects/archive", priority: 0.7, changefreq: "monthly" },
+			{ path: "/academy", priority: 0.9, changefreq: "weekly" },
 		];
 		const projectPages = projects.Projects.map((project) => ({
 			path: `/projects/${project.slug}`,
@@ -20,7 +22,14 @@ module.exports = {
 			changefreq: project.show ? "weekly" : "monthly",
 		}));
 
-		return [...staticPages, ...projectPages].map((page) => ({
+		const courses = getCourses();
+		const coursePages = courses.map((course) => ({
+			path: `/academy/${course.id}`,
+			priority: 0.8,
+			changefreq: "weekly",
+		}));
+
+		return [...staticPages, ...projectPages, ...coursePages].map((page) => ({
 			loc: page.path,
 			changefreq: page.changefreq,
 			priority: page.priority,
@@ -44,13 +53,16 @@ module.exports = {
 		if (path === "/") {
 			priority = 1.0;
 			changefreq = "daily";
-		} else if (path === "/about" || path === "/projects") {
+		} else if (path === "/about" || path === "/projects" || path === "/academy") {
 			priority = 0.9;
 			changefreq = "weekly";
 		} else if (path === "/projects/archive") {
 			priority = 0.7;
 			changefreq = "monthly";
 		} else if (path.startsWith("/projects/")) {
+			priority = 0.8;
+			changefreq = "weekly";
+		} else if (path.startsWith("/academy/")) {
 			priority = 0.8;
 			changefreq = "weekly";
 		}
