@@ -26,7 +26,8 @@ const STEPS = [
   { key: "firstName",  reply: ()  => "Quel est votre âge ?" },
   { key: "age",        reply: ()  => "Dans quelle ville ou commune habitez-vous ?" },
   { key: "location",   reply: ()  => "Quelle est votre profession ou fonction ?" },
-  { key: "job",        reply: ()  => "Quelle est votre motivation pour rejoindre BLUE ou en savoir plus sur nous ?" },
+  { key: "job",        reply: ()  => "Êtes-vous déjà membre de BLUE ? (oui/non)" },
+  { key: "isMember",   reply: (v) => v.toLowerCase().includes("oui") ? "Super ! En tant que membre, je peux vous aider avec des informations spécifiques. Quelle est votre motivation pour discuter avec moi aujourd'hui ?" : "Pas de souci ! Vous découvrirez BLUE à travers notre conversation. Quelle est votre motivation pour nous rejoindre ou en savoir plus ?" },
   { key: "motivation", reply: null },
 ];
 
@@ -36,6 +37,7 @@ const PLACEHOLDERS = [
   "Votre âge...",
   "Votre ville / commune...",
   "Votre profession...",
+  "oui ou non...",
   "Votre motivation...",
 ];
 
@@ -72,7 +74,7 @@ export default function MrBlueChat() {
   const [messages,    setMessages]    = useState([]);
   const [step,        setStep]        = useState(0);
   const [onboardDone, setOnboardDone] = useState(false);
-  const [userInfo,    setUserInfo]    = useState({ lastName: "", firstName: "", age: "", location: "", job: "", motivation: "" });
+  const [userInfo,    setUserInfo]    = useState({ lastName: "", firstName: "", age: "", location: "", job: "", isMember: false, motivation: "" });
   const [localTyping, setLocalTyping] = useState(false);
   const [isStreaming, setIsStreaming] = useState(false);
   const [input,       setInput]       = useState("");
@@ -119,11 +121,14 @@ export default function MrBlueChat() {
     const existing = getChatUserBySession(sessionId);
     if (existing) {
       userIdRef.current = existing.id;
-      setUserInfo({ lastName: existing.lastName, firstName: existing.firstName, age: existing.age, location: existing.location, job: existing.job, motivation: existing.motivation });
+      setUserInfo({ lastName: existing.lastName, firstName: existing.firstName, age: existing.age, location: existing.location, job: existing.job, isMember: existing.isMember || false, motivation: existing.motivation });
       setOnboardDone(true);
-      botDelay(`Bon retour ${existing.firstName} ! 👋\n\nJe suis MR BLUE, votre assistant officiel BLUE.\nComment puis-je vous aider aujourd'hui ?`, 600);
+      const greeting = existing.isMember 
+        ? `Bon retour ${existing.firstName} ! 👋\n\nJe suis MR BLUE, votre assistant officiel BLUE. Ravi de te revoir parmi nous !\nComment puis-je t'aider aujourd'hui ?`
+        : `Bon retour ${existing.firstName} ! 👋\n\nJe suis MR BLUE, votre assistant officiel BLUE.\nComment puis-je vous aider aujourd'hui ?`;
+      botDelay(greeting, 600);
     } else {
-      botDelay("Bonjour 👋 et bienvenue chez BLUE.\n\nJe suis MR BLUE, votre assistant de recrutement et d'information.\n\nAvant de poursuivre, j'aimerais apprendre à vous connaître afin de mieux vous accompagner.\n\nQuel est votre nom de famille ?", 600);
+      botDelay("Bonjour 👋 et bienvenue chez BLUE.\n\nJe suis MR BLUE, votre assistant et bibliothèque vivante de BLUE.\n\nAvant de poursuivre, j'aimerais apprendre à vous connaître afin de mieux vous accompagner.\n\nQuel est votre nom de famille ?", 600);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
@@ -134,7 +139,11 @@ export default function MrBlueChat() {
 
   const handleOnboarding = async (val, info) => {
     const s = STEPS[step];
-    const newInfo = { ...info, [s.key]: val };
+    let processedVal = val;
+    if (s.key === "isMember") {
+      processedVal = val.toLowerCase().includes("oui") ? true : false;
+    }
+    const newInfo = { ...info, [s.key]: processedVal };
     setUserInfo(newInfo);
 
     if (step < STEPS.length - 1) {
@@ -144,11 +153,14 @@ export default function MrBlueChat() {
       setStep((n) => n + 1);
       const uid2 = addChatUser({ ...newInfo, sessionId });
       userIdRef.current = uid2;
-      await botDelay(`Merci beaucoup ${newInfo.firstName} ! 🙏\n\nJe suis maintenant prêt à répondre à toutes vos questions sur BLUE, nos programmes, nos formations ou comment nous rejoindre.\n\nComment puis-je vous aider aujourd'hui ?`, 1000);
+      const memberMsg = newInfo.isMember 
+        ? "Bienvenue parmi nous ! En tant que membre, je suis là pour vous accompagner avec toutes les informations dont vous avez besoin."
+        : "Je suis ravi de vous accueillir ! Je vous guiderai pour rejoindre BLUE et découvrir nos actions.";
+      await botDelay(`Merci beaucoup ${newInfo.firstName} ! 🙏\n\n${memberMsg}\n\nJe suis maintenant prêt à répondre à toutes vos questions sur BLUE, nos programmes, nos formations ou comment nous rejoindre.\n\nComment puis-je vous aider aujourd'hui ?`, 1000);
       const wa = getWhatsApp(newInfo.location);
-      if (wa) {
+      if (wa && !newInfo.isMember) {
         setTimeout(() => {
-          setMessages((p) => [...p, { id: uid(), role: "assistant", content: `🌍 Vous appartenez à la zone **${wa.zone}**.\n\nVoici votre groupe officiel BLUE :`, time: new Date(), waLink: wa.link, waZone: wa.zone }]);
+          setMessages((p) => [...p, { id: uid(), role: "assistant", content: `🌍 Vous appartenez à la zone **${wa.zone}**.\n\nVoici votre groupe officiel BLUE pour rejoindre la communauté :`, time: new Date(), waLink: wa.link, waZone: wa.zone }]);
         }, 2400);
       }
       setOnboardDone(true);
