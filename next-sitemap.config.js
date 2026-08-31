@@ -1,5 +1,5 @@
 const projects = require("./json/data.json");
-const { getCourses } = require("./lib/store");
+const { getCoursesForSitemap } = require("./lib/sitemapCourses.cjs");
 
 /** @type {import('next-sitemap').IConfig} */
 module.exports = {
@@ -22,7 +22,7 @@ module.exports = {
 			changefreq: project.show ? "weekly" : "monthly",
 		}));
 
-		const courses = getCourses();
+		const courses = await getCoursesForSitemap();
 		const coursePages = courses.map((course) => ({
 			path: `/academy/${course.id}`,
 			priority: 0.8,

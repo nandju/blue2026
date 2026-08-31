@@ -4,10 +4,10 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  isAdminAuthenticated, adminLogout, getStats,
+  adminLogout, getStats,
   getCourses, addCourse, updateCourse, deleteCourse,
-  getRegistrations, getCertificateRequests, updateCertificateRequest,
-  getConversations, getVolunteer, setVolunteer,
+  getCertificateRequests, updateCertificateRequest,
+  getVolunteer, setVolunteer,
 } from "@/lib/store";
 
 const TABS = [
@@ -35,6 +35,13 @@ function StatCard({ label, value, icon, color = "#0D6EBB" }) {
 
 // ─── Overview ──────────────────────────────────────────────────────────────
 function Overview({ stats }) {
+  const [pendingCertificates, setPendingCertificates] = useState(0);
+  useEffect(() => {
+    getCertificateRequests()
+      .then((reqs) => setPendingCertificates(reqs.filter((r) => r.status === "pending").length))
+      .catch(() => {});
+  }, []);
+
   return (
     <div>
       <h2 className="text-xl font-bold text-gray-900 mb-6">Tableau de bord global</h2>
@@ -44,7 +51,7 @@ function Overview({ stats }) {
         <StatCard label="Certificats délivrés" value={stats.certificates} icon="🏆" color="#0D6EBB" />
         <StatCard label="Conversations MR BLUE" value={stats.conversations} icon="💬" color="#0DBD9F" />
         <StatCard label="Bénévole du Mois actif" value={stats.volunteers} icon="🌟" color="#0D6EBB" />
-        <StatCard label="Demandes en attente" value={getCertificateRequests().filter(r => r.status === "pending").length} icon="⏳" color="#f59e0b" />
+        <StatCard label="Demandes en attente" value={pendingCertificates} icon="⏳" color="#f59e0b" />
       </div>
       <div className="bg-gradient-to-br from-[#0D6EBB] to-[#0DBD9F] rounded-2xl p-6 text-white">
         <h3 className="text-lg font-bold mb-1">Blue Academy — Plateforme BLUE</h3>
@@ -64,7 +71,7 @@ function CourseManagement() {
   const [sectionsText, setSectionsText] = useState("");
   const [quizText, setQuizText] = useState("");
 
-  const load = useCallback(() => setCourses(getCourses()), []);
+  const load = useCallback(() => { getCourses().then(setCourses).catch(() => {}); }, []);
   useEffect(() => { load(); }, [load]);
 
   const openAdd = () => {
@@ -81,7 +88,7 @@ function CourseManagement() {
     setModal("edit");
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     const parsedSections = sectionsText.trim().split("\n---\n").filter(Boolean).map(line => {
       const [title, content] = line.split("|");
       return { title: title?.trim() || "", content: content?.trim() || "" };
@@ -91,14 +98,14 @@ function CourseManagement() {
       return { question: parts[0]?.trim(), options: parts[1]?.split(",").map(s => s.trim()) || [], answer: parseInt(parts[2]) || 0 };
     });
     const course = { ...form, sections: parsedSections, quiz: parsedQuiz };
-    if (modal === "add") addCourse(course);
-    else updateCourse(form.id, course);
+    if (modal === "add") await addCourse(course);
+    else await updateCourse(form.id, course);
     load();
     setModal(null);
   };
 
-  const handleDelete = (id) => {
-    if (confirm("Supprimer cette formation ?")) { deleteCourse(id); load(); }
+  const handleDelete = async (id) => {
+    if (confirm("Supprimer cette formation ?")) { await deleteCourse(id); load(); }
   };
 
   return (
@@ -200,11 +207,12 @@ function CourseManagement() {
 function CertificateManagement() {
   const [requests, setRequests] = useState([]);
   const [search, setSearch] = useState("");
-  useEffect(() => { setRequests(getCertificateRequests()); }, []);
+  const load = useCallback(() => { getCertificateRequests().then(setRequests).catch(() => {}); }, []);
+  useEffect(() => { load(); }, [load]);
 
-  const handleAction = (id, status) => {
-    updateCertificateRequest(id, { status });
-    setRequests(getCertificateRequests());
+  const handleAction = async (id, status) => {
+    await updateCertificateRequest(id, { status });
+    load();
   };
 
   const filtered = requests.filter(r =>
@@ -254,68 +262,20 @@ function CertificateManagement() {
 }
 
 // ─── Conversation Management ───────────────────────────────────────────────
+// Les conversations MR BLUE (utilisateurs + historique complet) ont leur propre
+// page dédiée avec recherche et filtres — /admin/chatbot.
 function ConversationManagement() {
-  const [conversations, setConversations] = useState([]);
-  const [search, setSearch] = useState("");
-  const [selected, setSelected] = useState(null);
-  useEffect(() => { setConversations(getConversations()); }, []);
-
-  const filtered = conversations.filter(c => {
-    const u = c.userInfo || {};
-    return `${u.lastName} ${u.firstName} ${u.location} ${u.job}`.toLowerCase().includes(search.toLowerCase());
-  });
-
   return (
-    <div className="flex gap-4 h-[60vh]">
-      {/* List */}
-      <div className="w-64 flex flex-col gap-3 overflow-y-auto shrink-0">
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-bold text-gray-900">Conversations ({conversations.length})</h2>
-        </div>
-        <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Rechercher..."
-          className="px-3 py-2 border border-[rgba(13,110,187,0.15)] rounded-xl text-sm outline-none focus:border-[#0D6EBB]" />
-        {filtered.map((c, i) => {
-          const u = c.userInfo || {};
-          return (
-            <button key={c.sessionId || i} onClick={() => setSelected(c)}
-              className={`text-left p-3 rounded-xl border transition-all ${selected?.sessionId === c.sessionId ? "border-[#0D6EBB] bg-[rgba(13,110,187,0.06)]" : "border-[rgba(13,110,187,0.1)] hover:border-[#0D6EBB] bg-white"}`}>
-              <p className="font-semibold text-gray-900 text-sm truncate">{u.firstName || "—"} {u.lastName || ""}</p>
-              <p className="text-gray-500 text-xs truncate mt-0.5">{u.location || "Non renseigné"}</p>
-              <p className="text-gray-400 text-xs">{c.messages?.length || 0} messages</p>
-            </button>
-          );
-        })}
-        {filtered.length === 0 && <p className="text-gray-400 text-sm text-center py-8">Aucune conversation</p>}
-      </div>
-
-      {/* Detail */}
-      <div className="flex-1 bg-white rounded-2xl border border-[rgba(13,110,187,0.12)] overflow-hidden flex flex-col">
-        {selected ? (
-          <>
-            <div className="bg-[#0D6EBB] px-5 py-4 text-white">
-              <p className="font-bold">{selected.userInfo?.firstName} {selected.userInfo?.lastName}</p>
-              <div className="flex flex-wrap gap-3 text-xs text-white/70 mt-1">
-                {[["Âge", selected.userInfo?.age], ["Lieu", selected.userInfo?.location], ["Poste", selected.userInfo?.job], ["Motivation", selected.userInfo?.motivation]].map(([k, v]) =>
-                  v ? <span key={k}><strong>{k}:</strong> {v}</span> : null
-                )}
-              </div>
-            </div>
-            <div className="flex-1 overflow-y-auto p-4 space-y-2 bg-[#f7faff]">
-              {(selected.messages || []).map((m, i) => (
-                <div key={i} className={`flex ${m.from === "user" ? "justify-end" : "justify-start"}`}>
-                  <div className={`max-w-[75%] px-4 py-2 rounded-2xl text-sm leading-relaxed ${m.from === "user" ? "bg-[#0D6EBB] text-white rounded-br-sm" : "bg-white text-gray-800 shadow-sm border border-[rgba(13,110,187,0.08)] rounded-bl-sm"}`}>
-                    {m.text}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </>
-        ) : (
-          <div className="flex-1 flex items-center justify-center text-gray-400 text-sm">
-            <div className="text-center"><p className="text-4xl mb-3">💬</p><p>Sélectionnez une conversation</p></div>
-          </div>
-        )}
-      </div>
+    <div className="flex flex-col items-center justify-center text-center py-24">
+      <p className="text-4xl mb-4">💬</p>
+      <h2 className="text-xl font-bold text-gray-900 mb-2">Conversations MR BLUE</h2>
+      <p className="text-gray-500 text-sm max-w-sm mb-6">
+        La liste des utilisateurs et l&apos;historique complet des conversations se trouvent sur la page dédiée MR BLUE.
+      </p>
+      <Link href="/admin/chatbot"
+        className="bg-[#0D6EBB] hover:bg-[#0DBD9F] text-white rounded-xl px-6 py-2.5 text-sm font-semibold transition-colors">
+        Ouvrir MR BLUE →
+      </Link>
     </div>
   );
 }
@@ -325,10 +285,10 @@ function VolunteerManagement() {
   const [form, setForm] = useState({ firstName: "", lastName: "", location: "", photo: "", actions: "", contribution: "", active: true });
   const [saved, setSaved] = useState(false);
 
-  useEffect(() => { setForm(getVolunteer()); }, []);
+  useEffect(() => { getVolunteer().then((v) => v && setForm(v)).catch(() => {}); }, []);
 
-  const handleSave = () => {
-    setVolunteer(form);
+  const handleSave = async () => {
+    await setVolunteer(form).catch(() => {});
     setSaved(true);
     setTimeout(() => setSaved(false), 3000);
   };
@@ -383,12 +343,10 @@ export default function AdminDashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
-    if (!isAdminAuthenticated()) { router.replace("/admin"); return; }
-    setStats(getStats());
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    getStats().then(setStats).catch(() => {});
   }, []);
 
-  const handleLogout = () => { adminLogout(); router.replace("/admin"); };
+  const handleLogout = async () => { await adminLogout().catch(() => {}); router.replace("/admin"); };
 
   return (
     <div className="min-h-screen bg-[#f7faff] flex">

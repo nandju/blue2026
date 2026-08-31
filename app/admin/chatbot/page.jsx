@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  isAdminAuthenticated, adminLogout,
+  adminLogout,
   getChatUsers, getChatMessages, getChatStats,
 } from "@/lib/store";
 
@@ -128,19 +128,18 @@ export default function AdminChatbot() {
   const [dateFilter, setDateFilter] = useState("all");
 
   useEffect(() => {
-    if (!isAdminAuthenticated()) { router.replace("/admin"); return; }
     loadData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const loadData = () => {
-    setUsers(getChatUsers());
-    setStats(getChatStats());
+    getChatUsers().then(setUsers).catch(() => {});
+    getChatStats().then(setStats).catch(() => {});
   };
 
   const selectUser = (user) => {
     setSelectedUser(user);
-    setSelectedMsgs(getChatMessages(user.id));
+    getChatMessages(user.id).then(setSelectedMsgs).catch(() => setSelectedMsgs([]));
   };
 
   const filteredUsers = users.filter((u) => {
@@ -171,7 +170,7 @@ export default function AdminChatbot() {
         <div className="flex items-center gap-3">
           <button onClick={loadData} className="text-sm text-[#0D6EBB] hover:text-[#0DBD9F] transition-colors">↻ Actualiser</button>
           <Link href="/" className="text-sm text-gray-400 hover:text-gray-600 transition-colors">← Site</Link>
-          <button onClick={() => { adminLogout(); router.replace("/admin"); }}
+          <button onClick={() => { adminLogout().catch(() => {}).finally(() => router.replace("/admin")); }}
             className="text-sm text-red-400 hover:text-red-600 transition-colors">Déconnexion</button>
         </div>
       </header>

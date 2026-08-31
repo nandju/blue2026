@@ -11,14 +11,14 @@ export default function VolunteerOfMonthPopup() {
   const [volunteer, setVolunteer] = useState(null);
 
   useEffect(() => {
-    const v = getVolunteer();
-    setVolunteer(v);
-    if (!v || !v.active) return;
-    const shown = sessionStorage.getItem(SESSION_SHOWN_KEY);
-    if (!shown) {
-      const t = setTimeout(() => setShowPopup(true), 1800);
-      return () => clearTimeout(t);
-    }
+    let timer;
+    getVolunteer().then((v) => {
+      setVolunteer(v);
+      if (!v || !v.active) return;
+      const shown = sessionStorage.getItem(SESSION_SHOWN_KEY);
+      if (!shown) timer = setTimeout(() => setShowPopup(true), 1800);
+    }).catch(() => {});
+    return () => clearTimeout(timer);
   }, []);
 
   const handleClose = () => {

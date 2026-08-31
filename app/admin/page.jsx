@@ -13,19 +13,17 @@ export default function AdminLoginPage() {
   const [showPw, setShowPw] = useState(false);
 
   useEffect(() => {
-    if (isAdminAuthenticated()) router.replace("/admin/dashboard");
+    isAdminAuthenticated().then((ok) => { if (ok) router.replace("/admin/dashboard"); });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
     setLoading(true);
-    setTimeout(() => {
-      const ok = adminLogin(email, password);
-      if (ok) { router.replace("/admin/dashboard"); }
-      else { setError("Email ou mot de passe incorrect."); setLoading(false); }
-    }, 700);
+    const ok = await adminLogin(email, password);
+    if (ok) { router.replace("/admin/dashboard"); }
+    else { setError("Email ou mot de passe incorrect."); setLoading(false); }
   };
 
   return (

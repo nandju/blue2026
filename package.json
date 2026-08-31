@@ -15,7 +15,8 @@
     "start": "next start",
     "lint": "next lint",
     "postbuild": "next-sitemap",
-    "generate-sitemap": "next-sitemap"
+    "generate-sitemap": "next-sitemap",
+    "seed:admin": "node --env-file=.env.local scripts/seed-admin.mjs"
   },
   "dependencies": {
     "@ai-sdk/google": "^3.0.80",
@@ -26,12 +27,15 @@
     "@fortawesome/free-regular-svg-icons": "^6.7.2",
     "@fortawesome/free-solid-svg-icons": "^6.7.2",
     "@fortawesome/react-fontawesome": "^0.2.2",
+    "@supabase/supabase-js": "^2.112.4",
     "@tailwindcss/postcss": "^4.0.14",
     "@vercel/analytics": "^1.5.0",
     "ai": "^6.0.198",
+    "bcryptjs": "^3.0.3",
     "eslint": "9.22.0",
     "eslint-config-next": "15.2.9",
     "framer-motion": "^12.5.0",
+    "jose": "^6.2.10",
     "next": "15.2.8",
     "next-sitemap": "4.2.3",
     "nprogress": "^0.2.0",
@@ -39,6 +43,7 @@
     "prop-types": "^15.8.1",
     "react": "19.0.0",
     "react-dom": "19.0.0",
+    "server-only": "^0.0.1",
     "sharp": "^0.33.5",
     "sitemap": "^8.0.1",
     "swr": "^2.3.3",

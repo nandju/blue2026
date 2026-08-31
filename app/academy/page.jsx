@@ -27,7 +27,7 @@ export default function AcademyPage() {
   const [category, setCategory] = useState("Tous");
   const [level, setLevel] = useState("Tous niveaux");
 
-  useEffect(() => { setCourses(getCourses()); }, []);
+  useEffect(() => { getCourses().then(setCourses).catch(() => setCourses([])); }, []);
 
   const filtered = courses.filter((c) => {
     const matchSearch = c.title.toLowerCase().includes(search.toLowerCase()) ||

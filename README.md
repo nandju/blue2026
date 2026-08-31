@@ -45,15 +45,17 @@ pnpm install
 
 ### Environment Variables
 
-Copy `.env.example` to `.env.local` and fill in the values:
+Copy `.env.example` to `.env.local` and fill in the values (see comments in that file for where each one comes from). Setup steps for the backend:
 
-```
-NEXT_PUBLIC_SPOTIFY_CLIENT_ID=
-NEXT_PUBLIC_SPOTIFY_CLIENT_SECRET=
-NEXT_PUBLIC_SPOTIFY_REFRESH_TOKEN=
-```
+1. **Supabase** — create a free project at [supabase.com](https://supabase.com), open the SQL editor and run the contents of `supabase/migrations/0001_init.sql`. Copy the Project URL and the `service_role` key (Settings → API) into `NEXT_PUBLIC_SUPABASE_URL` / `SUPABASE_SERVICE_ROLE_KEY`.
+2. **Admin account** — set `ADMIN_SEED_EMAIL` / `ADMIN_SEED_PASSWORD` in `.env.local`, then run `npm run seed:admin` once. This creates (or updates) the admin login in Supabase; the two variables aren't needed afterwards.
+3. **MR BLUE (chatbot)** — create a free account at [console.groq.com](https://console.groq.com), go to API Keys → Create API Key, and put it in `GROQ_API_KEY`.
+4. **Spotify** *(optional, "now playing" widget on `/about`)* — see [leerob.io/blog/spotify-api-nextjs](https://leerob.io/blog/spotify-api-nextjs).
 
-For Spotify API setup, see [leerob.io/blog/spotify-api-nextjs](https://leerob.io/blog/spotify-api-nextjs).
+`AUTH_SECRET` (signs admin session cookies) is already generated for local dev in `.env.local`; generate a new one for production with:
+```
+node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+```
 
 ### Development
 

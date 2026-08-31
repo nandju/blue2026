@@ -4,9 +4,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import {
-  isRegistered,
+  getCourse,
   addRegistration,
-  getRegistration,
   getCourseProgress,
   setProgress,
   getCourseQuizResult,
@@ -82,15 +81,21 @@ function RegistrationForm({ course, onComplete }) {
     return e;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const errs = validate();
     if (Object.keys(errs).length) { setErrors(errs); return; }
     setLoading(true);
-    setTimeout(() => {
-      addRegistration({ ...form, courseId: course.id });
+    try {
+      await addRegistration({ ...form, courseId: course.id });
       onComplete(form);
-    }, 800);
+    } catch {
+      // Already registered (or a transient error) — proceed to content anyway,
+      // the registration form already has the learner's info stored locally.
+      onComplete(form);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const fields = [
@@ -260,7 +265,7 @@ function Quiz({ course, reg, onComplete }) {
     const score = Math.round((correct / quiz.length) * 100);
     const passed = score >= 80;
     const r = { courseId: course.id, email: reg.email, score, correct, total: quiz.length, passed };
-    addQuizResult(r);
+    addQuizResult(r).catch(() => {});
     setResult(r);
     setSubmitted(true);
   };
@@ -348,8 +353,8 @@ function CertificateStage({ course, reg, quizResult }) {
   const [officialForm, setOfficialForm] = useState(false);
   const [paymentInfo, setPaymentInfo] = useState("");
 
-  const handleOfficialRequest = () => {
-    addCertificateRequest({
+  const handleOfficialRequest = async () => {
+    await addCertificateRequest({
       courseId: course.id,
       courseTitle: course.title,
       email: reg.email,
@@ -357,7 +362,7 @@ function CertificateStage({ course, reg, quizResult }) {
       lastName: reg.lastName,
       score: quizResult.score,
       paymentInfo,
-    });
+    }).catch(() => {});
     setOfficialRequested(true);
     setOfficialForm(false);
   };
@@ -445,18 +450,24 @@ export default function CourseDetailPage() {
   const [quizResult, setQuizResult] = useState(null);
 
   useEffect(() => {
-    const c = getCourse(courseId);
-    if (!c) { setStage("notfound"); return; }
-    setCourse(c);
-    // Check if user already registered (try stored email)
-    const stored = typeof window !== "undefined" ? localStorage.getItem(`blue_reg_${courseId}`) : null;
-    if (stored) {
-      const r = JSON.parse(stored);
-      setReg(r);
-      const qr = getCourseQuizResult(courseId, r.email);
-      if (qr?.passed) { setQuizResult(qr); setStage("certificate"); }
-      else setStage("content");
-    } else { setStage("register"); }
+    let cancelled = false;
+    (async () => {
+      const c = await getCourse(courseId);
+      if (cancelled) return;
+      if (!c) { setStage("notfound"); return; }
+      setCourse(c);
+      // Check if user already registered (try stored email)
+      const stored = typeof window !== "undefined" ? localStorage.getItem(`blue_reg_${courseId}`) : null;
+      if (stored) {
+        const r = JSON.parse(stored);
+        setReg(r);
+        const qr = await getCourseQuizResult(courseId, r.email).catch(() => null);
+        if (cancelled) return;
+        if (qr?.passed) { setQuizResult(qr); setStage("certificate"); }
+        else setStage("content");
+      } else { setStage("register"); }
+    })();
+    return () => { cancelled = true; };
   }, [courseId]);
 
   const handleRegistered = (formData) => {

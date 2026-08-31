@@ -86,6 +86,13 @@ RÈGLES ABSOLUES DE RÉPONSE
 10. Répondre uniquement en français`;
 
 export async function POST(req) {
+  if (!process.env.GROQ_API_KEY) {
+    return new Response(
+      "Le chatbot MR BLUE n'est pas encore configuré (clé API manquante). Contactez-nous directement : blue@bluemakers.net",
+      { status: 500 }
+    );
+  }
+
   const { messages, userInfo } = await req.json();
 
   const userContext = userInfo

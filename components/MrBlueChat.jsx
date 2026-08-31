@@ -118,18 +118,21 @@ export default function MrBlueChat() {
   useEffect(() => {
     if (!isOpen || initialized.current) return;
     initialized.current = true;
-    const existing = getChatUserBySession(sessionId);
-    if (existing) {
-      userIdRef.current = existing.id;
-      setUserInfo({ lastName: existing.lastName, firstName: existing.firstName, age: existing.age, location: existing.location, job: existing.job, isMember: existing.isMember || false, motivation: existing.motivation });
-      setOnboardDone(true);
-      const greeting = existing.isMember 
-        ? `Bon retour ${existing.firstName} ! 👋\n\nJe suis MR BLUE, votre assistant officiel BLUE. Ravi de te revoir parmi nous !\nComment puis-je t'aider aujourd'hui ?`
-        : `Bon retour ${existing.firstName} ! 👋\n\nJe suis MR BLUE, votre assistant officiel BLUE.\nComment puis-je vous aider aujourd'hui ?`;
-      botDelay(greeting, 600);
-    } else {
+    getChatUserBySession(sessionId).then((existing) => {
+      if (existing) {
+        userIdRef.current = existing.id;
+        setUserInfo({ lastName: existing.lastName, firstName: existing.firstName, age: existing.age, location: existing.location, job: existing.job, isMember: existing.isMember || false, motivation: existing.motivation });
+        setOnboardDone(true);
+        const greeting = existing.isMember
+          ? `Bon retour ${existing.firstName} ! 👋\n\nJe suis MR BLUE, votre assistant officiel BLUE. Ravi de te revoir parmi nous !\nComment puis-je t'aider aujourd'hui ?`
+          : `Bon retour ${existing.firstName} ! 👋\n\nJe suis MR BLUE, votre assistant officiel BLUE.\nComment puis-je vous aider aujourd'hui ?`;
+        botDelay(greeting, 600);
+      } else {
+        botDelay("Bonjour 👋 et bienvenue chez BLUE.\n\nJe suis MR BLUE, votre assistant et bibliothèque vivante de BLUE.\n\nAvant de poursuivre, j'aimerais apprendre à vous connaître afin de mieux vous accompagner.\n\nQuel est votre nom de famille ?", 600);
+      }
+    }).catch(() => {
       botDelay("Bonjour 👋 et bienvenue chez BLUE.\n\nJe suis MR BLUE, votre assistant et bibliothèque vivante de BLUE.\n\nAvant de poursuivre, j'aimerais apprendre à vous connaître afin de mieux vous accompagner.\n\nQuel est votre nom de famille ?", 600);
-    }
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
 
@@ -151,7 +154,7 @@ export default function MrBlueChat() {
       await botDelay(s.reply(val));
     } else {
       setStep((n) => n + 1);
-      const uid2 = addChatUser({ ...newInfo, sessionId });
+      const uid2 = await addChatUser({ ...newInfo, sessionId }).catch(() => null);
       userIdRef.current = uid2;
       const memberMsg = newInfo.isMember 
         ? "Bienvenue parmi nous ! En tant que membre, je suis là pour vous accompagner avec toutes les informations dont vous avez besoin."
@@ -197,7 +200,7 @@ export default function MrBlueChat() {
 
       setMessages((p) => p.map((m) => m.id === msgId ? { ...m, streaming: false } : m));
       aiConvRef.current = [...aiConvRef.current, { role: "assistant", content: aiText }];
-      if (userIdRef.current) addChatMessage(userIdRef.current, userMessage, aiText);
+      if (userIdRef.current) addChatMessage(userIdRef.current, userMessage, aiText).catch(() => {});
 
     } catch (e) {
       if (e.name !== "AbortError") {
@@ -397,7 +400,7 @@ export default function MrBlueChat() {
                   </svg>
                 </motion.button>
               </div>
-              <p className="text-center text-[10px] text-gray-400 mt-2">Propulsé par BLUE 🌊 · IA Gemini</p>
+              <p className="text-center text-[10px] text-gray-400 mt-2">Propulsé par BLUE 🌊 · IA</p>
             </div>
           </motion.div>
         )}
