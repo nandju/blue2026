@@ -1,125 +1,79 @@
 "use client";
+import { useEffect } from "react";
 import { motion } from "framer-motion";
-
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faGithub } from "@fortawesome/free-brands-svg-icons";
-import { faArrowUpRightFromSquare } from "@fortawesome/free-solid-svg-icons";
-import FixedButon from "@/components/FixedButton";
-import { faChevronLeft } from "@fortawesome/free-solid-svg-icons";
-import Projects from "@/json/data.json";
 import Link from "next/link";
 
-export default function Page() {
-	const projects = Projects.Projects;
-	return (
-		<>
-			<main className="overflow-hidden">
-				<FixedButon href="/projects">
-					<FontAwesomeIcon icon={faChevronLeft} className="text-black pr-10" />
-				</FixedButon>
-				<div className="min-h-screen w-screen mt-10 md:mt-0  p-10 flex justify-center items-center flex-col mb-10">
-					<div className="flex justify-center items-center flex-col my-5 self-start ">
-						<motion.div
-							className="bg-[#0D6EBB] w-28 h-1 rounded-full mb-3 self-start"
-							initial={{
-								opacity: 0,
-								x: -250,
-							}}
-							animate={{
-								opacity: 1,
-								x: 50,
-							}}
-							transition={{
-								delay: 0.5,
-								duration: 1,
-								type: "spring",
-							}}></motion.div>
-						<motion.div
-							className="bg-[#0D6EBB] w-28 h-1 rounded-full"
-							initial={{
-								opacity: 0,
-								x: 200,
-							}}
-							animate={{
-								opacity: 1,
-								x: 0,
-							}}
-							transition={{
-								delay: 0.5,
-								duration: 1,
-								type: "spring",
-							}}></motion.div>
-						<motion.h1
-							className="text-3xl font-bold mt-3"
-							initial={{
-								opacity: 0,
-								x: -200,
-							}}
-							animate={{
-								opacity: 1,
-								x: 0,
-							}}
-							transition={{
-								delay: 0.7,
-								duration: 1,
-								type: "spring",
-							}}>
-							Archives
-						</motion.h1>
-					</div>
+import PageHero from "@/components/PageHero";
+import Projects from "@/json/data.json";
+import HeroImg from "@/public/ong_blue/images/illustrations/page-landing/marine-research-ocean-pollution-study.jpg";
 
-					<div className="mx-auto container md:px-10 grid grid-cols-1 mb-">
-						{/* invisible table */}
-						<table className="space-y-3">
+export default function ArchivePage() {
+	const projects = Projects.Projects;
+
+	useEffect(() => {
+		window.scrollTo(0, 0);
+	}, []);
+
+	return (
+		<main className="overflow-x-hidden">
+			<PageHero
+				image={HeroImg}
+				eyebrow="Archives"
+				title="L'historique de nos actions"
+				description="Retrouvez l'ensemble des projets et programmes menés par BLUE depuis sa création en 2022."
+			/>
+
+			<section className="py-16 md:py-24 bg-white">
+				<div className="mx-auto max-w-5xl px-6 md:px-8">
+					<div className="overflow-x-auto rounded-2xl border border-[#0D6EBB]/10 shadow-sm">
+						<table className="w-full text-left text-sm">
 							<thead>
-								<tr className=" hover:shadow-md  transition-all ease duration-500">
-									<th className="text-start">Année</th>
-									<th className="text-start">Titre</th>
-									<th className="text-start">Domaines</th>
-									<th className="text-start">Lien</th>
+								<tr className="bg-[#0D6EBB] text-white">
+									<th className="py-4 px-5 font-semibold">Année</th>
+									<th className="py-4 px-5 font-semibold">Projet</th>
+									<th className="py-4 px-5 font-semibold hidden md:table-cell">Domaines</th>
+									<th className="py-4 px-5 font-semibold">Lien</th>
 								</tr>
 							</thead>
 							<tbody>
 								{projects.map((project, index) => (
-									<tr
-										key={index}
-										className="hover:shadow-md transition-all ease duration-500">
-										<td>{project.year}</td>
-										<td>
-											<Link href={`/projects/${project.slug}`}>
-												{project.title}
+									<motion.tr
+										key={project.slug}
+										className="border-t border-[#0D6EBB]/8 hover:bg-[#f4f9fd] transition-colors"
+										initial={{ opacity: 0, y: 10 }}
+										whileInView={{ opacity: 1, y: 0 }}
+										viewport={{ once: true }}
+										transition={{ delay: index * 0.04 }}>
+										<td className="py-4 px-5 text-[#0DBD9F] font-semibold whitespace-nowrap">
+											{project.year}
+										</td>
+										<td className="py-4 px-5 font-medium text-[#073A63]">
+											{project.title}
+										</td>
+										<td className="py-4 px-5 text-gray-500 hidden md:table-cell">
+											{project.tech.join(", ")}
+										</td>
+										<td className="py-4 px-5">
+											<Link
+												href={`/projects/${project.slug}`}
+												className="text-[#0D6EBB] font-semibold hover:text-[#0DBD9F] transition-colors whitespace-nowrap">
+												Voir →
 											</Link>
 										</td>
-										<td>{project.tech.map((t) => `${t}, `)}</td>
-										<td>
-											<div className="flex flex-row justify-center items-center">
-												{project.code && (
-													<a href={project.code} title="Link to GitHub">
-														<FontAwesomeIcon
-															icon={faGithub}
-															className="text-xl mr-2"
-														/>
-													</a>
-												)}
-												{project.preview && (
-													<a
-														href={project.preview}
-														title="Link to project preview">
-														<FontAwesomeIcon
-															icon={faArrowUpRightFromSquare}
-															className="text-xl"
-														/>
-													</a>
-												)}
-											</div>
-										</td>
-									</tr>
+									</motion.tr>
 								))}
 							</tbody>
 						</table>
 					</div>
+					<div className="mt-10 text-center">
+						<Link
+							href="/projects"
+							className="inline-block rounded-full bg-[#0D6EBB] px-8 py-3 text-sm font-semibold text-white hover:bg-[#0DBD9F] transition-colors">
+							← Retour aux projets
+						</Link>
+					</div>
 				</div>
-			</main>
-		</>
+			</section>
+		</main>
 	);
 }

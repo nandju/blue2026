@@ -1,5 +1,3 @@
-import Footer from "@/components/Footer";
-
 export const metadata = {
   title: "Nos Projets | BLUE - Actions Contre la Pollution Plastique",
   description: "Découvrez les projets environnementaux de BLUE : RECYCL'DAY, collectes de déchets, sensibilisation et formations pour un avenir durable en Côte d'Ivoire.",
@@ -14,10 +12,5 @@ export const metadata = {
 };
 
 export default function ProjectsLayout({ children }) {
-  return (
-    <>
-      {children}
-      <Footer />
-    </>
-  );
+  return <>{children}</>;
 }

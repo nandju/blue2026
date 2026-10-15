@@ -1,33 +1,42 @@
-"use client"
+"use client";
 import React from "react";
 import Link from "next/link";
+import Image from "next/image";
 
-const NotFound = () => (
-	<div>
-		<div className="relative min-h-screen w-full  gap-4 p-10 flex justify-center items-center flex-col mb-10 ">
-			<div className="min-h-screen flex justify-center items-center">
-				<div className="mx-auto grid grid-cols-1   ">
-					<div className="flex justify-center items-center flex-col mb-5 space-y-10">
-						<div>
-							<h2 className="uppercase font-normal text-lg tracking-[8px] text-neutral-400 text-center">
-								Page not found
-							</h2>
-							<h1 className="text-4xl font-medium text-neutral-900 text-center">
-								404
-							</h1>
-						</div>
-						<div>
-							<button
-								onClick={() => window.history.back()}
-								className="text-lg text-neutral-900 hover:text-neutral-800 text-center border-2 border-gray-800 rounded-xl p-3 py-2 mt-2">
-								Go Back
-							</button>
-						</div>
-					</div>
-				</div>
+import Img404 from "@/public/ong_blue/images/illustrations/page-introuvable/404-erreur.png";
+
+export default function NotFound() {
+	return (
+		<div className="min-h-screen flex flex-col items-center justify-center px-6 py-24 bg-[#f4f9fd] text-center">
+			<div className="relative w-64 h-64 md:w-80 md:h-80">
+				<Image
+					src={Img404}
+					alt="Page introuvable"
+					fill
+					sizes="320px"
+					className="object-contain"
+					priority
+				/>
+			</div>
+			<h1 className="mt-6 text-3xl md:text-5xl font-bold text-[#073A63]">
+				Page introuvable
+			</h1>
+			<p className="mt-4 text-gray-600 max-w-md">
+				La page que vous recherchez n&apos;existe pas ou a été déplacée.
+				Revenons ensemble sur le droit chemin.
+			</p>
+			<div className="mt-8 flex flex-wrap justify-center gap-4">
+				<Link
+					href="/"
+					className="rounded-full bg-[#0D6EBB] px-8 py-3 text-sm font-semibold text-white shadow-lg hover:bg-[#0DBD9F] transition-colors">
+					Retour à l&apos;accueil
+				</Link>
+				<button
+					onClick={() => window.history.back()}
+					className="rounded-full border-2 border-[#0D6EBB] px-8 py-3 text-sm font-semibold text-[#0D6EBB] hover:bg-[#0D6EBB] hover:text-white transition-colors">
+					Page précédente
+				</button>
 			</div>
 		</div>
-	</div>
-);
-
-export default NotFound;
+	);
+}

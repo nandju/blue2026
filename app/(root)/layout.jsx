@@ -1,16 +1,9 @@
-"use client";
-import Sidebar from "@/components/Sidebar";
-import { FullPageProvider } from "@alvalens/react-fullpage-snap";
+export const metadata = {
+	title: "BLUE | ONG Environnementale — Côte d'Ivoire",
+	description:
+		"BLUE est une ONG ivoirienne fondée en 2022 à Abidjan. Nettoyages de plages, recyclage du plastique, plantations d'arbres et formations Blue Academy pour un avenir durable.",
+};
 
 export default function RootLayout({ children }) {
-	return (
-		<FullPageProvider
-			anchors={["home", "about", "projects", "academy", "contact"]}
-			scrollingSpeed={1000}
-			menu="#sidebar"
-			lockAnchors={false}>
-			<Sidebar />
-			{children}
-		</FullPageProvider>
-	);
+	return <>{children}</>;
 }

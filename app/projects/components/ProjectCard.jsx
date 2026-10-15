@@ -5,55 +5,54 @@ import PropTypes from "prop-types";
 import BlurImage from "@/public/image/placeholder/blur.jpg";
 
 export default function ProjectCard({ project, index, activeCategory }) {
+	if (!project.category.includes(Number(activeCategory))) return null;
+
 	return (
-		<>
-			{project.category.includes(parseInt(activeCategory)) && (
-				<Link href={"projects/" + project.slug} key={index}>
-					<motion.div
-						className="z-10 relative flex justify-center items-start flex-col mb-5 md:px-10 w-full h-auto bg-gray-400 group/tes py-20 px-5 md:py-2 aspect-video "
-						initial={{
-							opacity: 0,
-							x: -200,
-						}}
-						whileInView={{
-							opacity: 1,
-							x: 0,
-						}}
-						transition={{
-							type: "spring",
-						}}>
-						<Image
-							src={project.thumbnail}
-							alt="Alvalens"
-							fill
-							placeholder="blur"
-							className="bg-slate-950 opacity-10  group-hover/tes:opacity-100 transition-all ease duration-500 object-cover"
-							blurDataURL={BlurImage.src}
-						/>
-						<div className="absolute top-0 left-0 bg-gray-600 px-4 py-2">
-							<h4 className="text-white">{project.year}</h4>
+		<motion.div
+			initial={{ opacity: 0, y: 30 }}
+			whileInView={{ opacity: 1, y: 0 }}
+			viewport={{ once: true, margin: "-40px" }}
+			transition={{ delay: (index % 3) * 0.08, duration: 0.5 }}>
+			<Link
+				href={`/projects/${project.slug}`}
+				className="group block h-full rounded-3xl overflow-hidden bg-white border border-[#0D6EBB]/10 shadow-sm hover:shadow-2xl transition-all duration-300">
+				<div className="relative aspect-[16/10] overflow-hidden">
+					<Image
+						src={project.thumbnail}
+						alt={project.title}
+						fill
+						sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+						className="object-cover group-hover:scale-105 transition-transform duration-700"
+						placeholder="blur"
+						blurDataURL={BlurImage.src}
+					/>
+					<div className="absolute inset-0 bg-gradient-to-t from-[#062E52]/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+					<span className="absolute top-4 left-4 bg-white/90 text-[#0D6EBB] text-xs font-bold px-3 py-1 rounded-full">
+						{project.year}
+					</span>
+				</div>
+				<div className="p-6">
+					<h3 className="text-lg font-bold text-[#073A63] group-hover:text-[#0D6EBB] transition-colors leading-snug">
+						{project.title}
+					</h3>
+					<p className="mt-2 text-sm text-gray-600 leading-relaxed line-clamp-2">
+						{project.desc[0]}
+					</p>
+					<div className="mt-4 flex items-center justify-between">
+						<div className="flex flex-wrap gap-1.5">
+							{project.tech.slice(0, 2).map((t) => (
+								<span key={t} className="text-xs px-2.5 py-1 rounded-full bg-[#0D6EBB]/8 text-[#0D6EBB]">
+									{t}
+								</span>
+							))}
 						</div>
-						<div className="transition-all ease duration-500 opacity-100 content text-center group-hover/tes:opacity-0 z-10">
-							<h1 className="text-3xl font-bold mb-3">{project.title}</h1>
-							<p>
-								{project.desc[0].length > 125
-									? `${project.desc[0].slice(0, 125)}...`
-									: project.desc[0]}
-							</p>
-							<div className="flex justify-center items-center flex-row mt-5 flex-wrap">
-								{project.tech.map((t, index) => (
-									<span
-										key={index}
-										className="m-1 px-4 py-2 bg-gray-600 text-white ">
-										{t}
-									</span>
-								))}
-							</div>
-						</div>
-					</motion.div>
-				</Link>
-			)}
-		</>
+						<span className="text-[#0DBD9F] text-sm font-semibold opacity-0 group-hover:opacity-100 transition-opacity">
+							Voir →
+						</span>
+					</div>
+				</div>
+			</Link>
+		</motion.div>
 	);
 }
 

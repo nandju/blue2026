@@ -1,34 +1,33 @@
 "use client";
 import { useState, useEffect, use, useCallback } from "react";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { motion } from "framer-motion";
 import jsonData from "@/json/data.json";
-
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faGithub } from "@fortawesome/free-brands-svg-icons";
-import { faArrowUpRightFromSquare } from "@fortawesome/free-solid-svg-icons";
 import NotFound from "@/app/not-found";
 import Image from "next/image";
 import BlurImage from "@/public/image/placeholder/blur.jpg";
-import { faChevronLeft } from "@fortawesome/free-solid-svg-icons";
-import { faChevronDown } from "@fortawesome/free-solid-svg-icons";
-import { faChevronUp } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faChevronLeft, faCalendarDays, faTags } from "@fortawesome/free-solid-svg-icons";
+
+const CATEGORY_LABELS = {
+	1: "Projet Environnemental",
+	2: "Formation & Éducation",
+	9: "Autre Initiative",
+};
 
 function ProjectImage({ src, alt, index }) {
 	const [loaded, setLoaded] = useState(false);
 	const handleLoad = useCallback(() => setLoaded(true), []);
 
 	return (
-		<div className="relative mb-5 max-w-7xl mx-auto w-full">
-			{!loaded && (
-				<div className="absolute inset-0 animate-pulse bg-neutral-300 rounded" />
-			)}
+		<div className="relative mb-6 w-full rounded-3xl overflow-hidden shadow-lg">
+			{!loaded && <div className="absolute inset-0 animate-pulse bg-[#0D6EBB]/10" />}
 			<Image
 				src={src}
 				alt={alt}
 				width={1920}
 				height={1080}
-				className={`h-auto w-full object-contain transition-opacity duration-500 ${loaded ? "opacity-100" : "opacity-0"}`}
+				className={`h-auto w-full object-cover transition-opacity duration-500 ${loaded ? "opacity-100" : "opacity-0"}`}
 				placeholder="blur"
 				blurDataURL={BlurImage.src}
 				loading={index === 0 ? "eager" : "lazy"}
@@ -38,200 +37,178 @@ function ProjectImage({ src, alt, index }) {
 	);
 }
 
-function ScrollDownButton() {
-  const [isAtBottom, setIsAtBottom] = useState(false);
+export default function ProjectDetailPage(props) {
+	const params = use(props.params);
+	const [data, setData] = useState(null);
 
-  const handleScroll = () => {
-    const scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
-    if (scrollTop < document.documentElement.scrollHeight - document.documentElement.clientHeight) {
-
-      window.scrollTo({
-        top: document.documentElement.scrollHeight,
-        behavior: "smooth",
-      });
-				setIsAtBottom(true);
-
-    } else {
-      window.scrollTo({
-        top: 0,
-        behavior: "smooth",
-      });
-			setIsAtBottom(false);
-    }
-  };
-
-  return (
-    <div className="fixed bottom-5 left-0 right-0 flex justify-center items-center mb-10">
-      <motion.div
-        className="h-10 w-10 bg-neutral-900 rounded-full flex justify-center items-center cursor-pointer"
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.9 }}
-        onClick={handleScroll}
-      >
-        <FontAwesomeIcon
-          icon={isAtBottom ? faChevronUp : faChevronDown}
-          className="text-white text-2xl"
-        />
-      </motion.div>
-    </div>
-  );
-}
-
-
-function Page(props) {
-    const params = use(props.params);
-    const router = useRouter();
-    const [data, setData] = useState(null);
-    useEffect(() => {
-		const selectedData = jsonData.Projects.find(
-			(item) => item.slug === params.slug
-		);
-		if (selectedData === undefined) {
-			setData("404");
-		} else {
-			setData(selectedData);
-		}
+	useEffect(() => {
+		const selectedData = jsonData.Projects.find((item) => item.slug === params.slug);
+		setData(selectedData === undefined ? "404" : selectedData);
+		window.scrollTo(0, 0);
 	}, [params.slug]);
 
-    if (data === "404") {
+	if (data === "404") return <NotFound />;
+
+	if (!data) {
 		return (
-			<>
-				<NotFound />
-			</>
-		);
-	} else if (!data) {
-		return (
-			<div className="relative min-h-screen w-full  gap-4 p-10 flex justify-center items-center flex-col mb-10 ">
-				<div className="min-h-screen flex justify-center items-center w-full">
-					<div className="mx-auto grid grid-cols-1 md:grid-cols-2  w-full">
-						<div className="flex justify-center items-start flex-col mb-5 space-y-10 w-ful p-4">
-							<div className="animate-pulse bg-neutral-400 h-20 w-full rounded shadow-lg"></div>
-							<div className="animate-pulse bg-neutral-400 h-20 w-full rounded shadow-lg"></div>
-							<div className="animate-pulse bg-neutral-400 h-20 w-full rounded shadow-lg"></div>
-							<div className="animate-pulse bg-neutral-400 h-20 w-full rounded shadow-lg"></div>
-							<div className="animate-pulse bg-neutral-400 h-20 w-full rounded shadow-lg"></div>
-						</div>
-						<div className="flex justify-start items-start flex-col mb-5 w-full p-4">
-							<div className="animate-pulse duration-500 shadow-lg bg-neutral-400 rounded  w-full h-full "></div>
-						</div>
-					</div>
-				</div>
-				{/* images */}
-				<div className="mx-auto grid grid-cols-1 p-5 md:p-20  w-full h-auto">
-					<div className="w-full h-auto aspect-video">
-						<div className="animate-pulse duration-500 shadow-lg bg-neutral-400 h-full w-full rounded"></div>
-					</div>
-				</div>
+			<div className="min-h-screen flex items-center justify-center">
+				<div className="w-12 h-12 rounded-full border-4 border-[#0D6EBB] border-t-transparent animate-spin" />
 			</div>
 		);
 	}
-    return (
-		<div className="relative min-h-screen w-full gap-4 p-10 flex justify-center items-center flex-col mb-10 ">
-			<button
-				onClick={() => router.back()}
-				className="fixed top-2 -left-2 md:left-10 flex justify-center items-center rounded-full p-4 transition duration-300 ease-in-out z-50"
-				aria-label="Go back">
-				<FontAwesomeIcon
-					icon={faChevronLeft}
-					className="text-black pr-10"
-				/>
-			</button>
-			<ScrollDownButton />
-			<div className="min-h-screen flex justify-center items-center">
-				<div className="mx-auto grid grid-cols-1 md:grid-cols-2  mt-10 md:mt-0">
-					<div className="min-h-screen sm:min-h-0 flex justify-center items-start flex-col mb-5 space-y-10 mx-auto">
-						<div>
-							<h2 className="uppercase font-normal text-lg tracking-[8px] text-neutral-400">
-								Project
-							</h2>
-							<h1 className="text-4xl font-medium text-neutral-900">
-								{data.title}
-							</h1>
-						</div>
-						<div>
-							<h2 className="uppercase font-normal text-lg tracking-[8px] text-neutral-400">
-								Technology
-							</h2>
-							<p className="text-2xl font-normal text-neutral-900">
-								{data.tech.join(", ")}
-							</p>
-						</div>
-						<div>
-							<h2 className="uppercase font-normal text-lg tracking-[8px] text-neutral-400">
-								Year
-							</h2>
-							<p className="text-2xl font-normal text-neutral-900">
-								{data.year}
-							</p>
-						</div>
-						{data.preview && (
-							<div>
-								<h2 className="uppercase font-normal text-lg tracking-[8px] text-neutral-400">
-									Preview
-								</h2>
-								<p className="text-2xl font-normal text-neutral-900">
-									<a
-										href={data.preview}
-										target="_blank"
-										rel="noopener noreferrer">
-										Preview{" "}
-										<FontAwesomeIcon
-											icon={faArrowUpRightFromSquare}
-											className="ml-3"
-										/>
-									</a>
-								</p>
-							</div>
-						)}
-						{data.code && (
-							<div>
-								<h2 className="uppercase font-normal text-lg tracking-[8px] text-neutral-400">
-									Source Code
-								</h2>
-								<p className="text-2xl font-normal text-neutral-900">
-									<a
-										href={data.code}
-										target="_blank"
-										rel="noopener noreferrer">
-										Github{" "}
-										<FontAwesomeIcon
-											icon={faGithub}
-											className="ml-3"
-										/>
-									</a>
-								</p>
-							</div>
-						)}
-					</div>
-					<div className="flex justify-start items-start flex-col mb-5 ">
-						<h2 className="uppercase font-normal text-lg tracking-[8px] text-neutral-400">
-							Description
+
+	const others = jsonData.Projects.filter((p) => p.slug !== data.slug && p.show).slice(0, 3);
+
+	return (
+		<main className="overflow-x-hidden">
+			{/* Hero */}
+			<section className="relative min-h-[55vh] flex items-end overflow-hidden">
+				<div className="absolute inset-0">
+					<Image
+						src={data.thumbnail}
+						alt={data.title}
+						fill
+						priority
+						sizes="100vw"
+						className="object-cover"
+						placeholder="blur"
+						blurDataURL={BlurImage.src}
+					/>
+					<div className="absolute inset-0 bg-gradient-to-b from-[#062E52]/60 via-[#0D6EBB]/30 to-[#062E52]/90" />
+				</div>
+				<div className="relative z-10 mx-auto w-full max-w-7xl px-6 md:px-8 pb-14 pt-40">
+					<Link
+						href="/projects"
+						className="inline-flex items-center gap-2 text-white/80 hover:text-white text-sm mb-6 transition-colors">
+						<FontAwesomeIcon icon={faChevronLeft} className="text-xs" />
+						Tous les projets
+					</Link>
+					<motion.h1
+						className="text-white text-4xl md:text-6xl font-bold leading-tight max-w-3xl"
+						initial={{ opacity: 0, y: 30 }}
+						animate={{ opacity: 1, y: 0 }}
+						transition={{ duration: 0.7 }}>
+						{data.title}
+					</motion.h1>
+					<motion.div
+						className="mt-5 flex flex-wrap items-center gap-4 text-white/80 text-sm"
+						initial={{ opacity: 0 }}
+						animate={{ opacity: 1 }}
+						transition={{ delay: 0.3 }}>
+						<span className="inline-flex items-center gap-2">
+							<FontAwesomeIcon icon={faCalendarDays} className="text-[#0DBD9F]" />
+							{data.year}
+						</span>
+						{data.category?.map((c) => (
+							<span key={c} className="inline-flex items-center gap-2 bg-white/15 rounded-full px-3 py-1">
+								{CATEGORY_LABELS[c] || "Projet"}
+							</span>
+						))}
+					</motion.div>
+				</div>
+			</section>
+
+			{/* Content */}
+			<section className="py-16 md:py-24 bg-white">
+				<div className="mx-auto max-w-7xl px-6 md:px-8 grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-12">
+					{/* Description */}
+					<motion.div
+						initial={{ opacity: 0, y: 30 }}
+						animate={{ opacity: 1, y: 0 }}
+						transition={{ duration: 0.6 }}>
+						<h2 className="text-2xl md:text-3xl font-bold text-[#073A63] mb-6">
+							À propos de ce projet
 						</h2>
-						{data.desc.map((desc, index) => (
-							<p
-								key={index}
-								className="text-xl text-justify tracking-wide font-normal text-gray-500 mb-5">
-								{desc}
+						<div className="space-y-5">
+							{data.desc.map((desc, index) => (
+								<p key={index} className="text-gray-600 text-base md:text-lg leading-relaxed text-justify">
+									{desc}
+								</p>
+							))}
+						</div>
+					</motion.div>
+
+					{/* Sidebar meta */}
+					<motion.aside
+						className="lg:sticky lg:top-28 self-start bg-[#f4f9fd] rounded-3xl border border-[#0D6EBB]/10 p-7"
+						initial={{ opacity: 0, x: 30 }}
+						animate={{ opacity: 1, x: 0 }}
+						transition={{ delay: 0.2, duration: 0.6 }}>
+						<h3 className="text-sm font-bold uppercase tracking-[0.2em] text-[#0DBD9F] mb-4">
+							Domaines d&apos;action
+						</h3>
+						<div className="flex flex-wrap gap-2">
+							{data.tech.map((t) => (
+								<span key={t} className="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-full bg-[#0D6EBB]/8 text-[#0D6EBB]">
+									<FontAwesomeIcon icon={faTags} className="text-[10px]" />
+									{t}
+								</span>
+							))}
+						</div>
+						<div className="mt-8 pt-6 border-t border-[#0D6EBB]/10">
+							<p className="text-sm text-gray-600 leading-relaxed">
+								Envie de participer à ce type d&apos;action ?
 							</p>
+							<Link
+								href="/benevolat"
+								className="mt-4 inline-block w-full text-center rounded-full bg-[#0D6EBB] px-6 py-3 text-sm font-semibold text-white hover:bg-[#0DBD9F] transition-colors">
+								Devenir bénévole
+							</Link>
+						</div>
+					</motion.aside>
+				</div>
+			</section>
+
+			{/* Gallery */}
+			{data.images?.length > 0 && (
+				<section className="pb-16 md:pb-24 bg-white">
+					<div className="mx-auto max-w-7xl px-6 md:px-8">
+						<h2 className="text-2xl md:text-3xl font-bold text-[#073A63] mb-8">
+							En images
+						</h2>
+						{data.images.map((image, index) => (
+							<ProjectImage key={index} src={image} alt={`${data.title} — image ${index + 1}`} index={index} />
 						))}
 					</div>
-				</div>
-			</div>
-			{/* images */}
-			<div className="mx-auto grid grid-cols-1 p-5 md:p-20 w-full">
-				<div className="w-full h-auto text-center flex flex-col justify-center ">
-					{data.images.map((image, index) => (
-						<ProjectImage
-							key={index}
-							src={image}
-							alt={`Project Image ${index + 1}`}
-							index={index}
-						/>
-					))}
-				</div>
-			</div>
-		</div>
+				</section>
+			)}
+
+			{/* Other projects */}
+			{others.length > 0 && (
+				<section className="py-16 md:py-20 bg-[#f4f9fd]">
+					<div className="mx-auto max-w-7xl px-6 md:px-8">
+						<h2 className="text-2xl md:text-3xl font-bold text-[#073A63] mb-8">
+							Autres actions de BLUE
+						</h2>
+						<div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+							{others.map((p) => (
+								<Link
+									key={p.slug}
+									href={`/projects/${p.slug}`}
+									className="group rounded-3xl overflow-hidden bg-white border border-[#0D6EBB]/10 shadow-sm hover:shadow-xl transition-all duration-300">
+									<div className="relative aspect-[16/10] overflow-hidden">
+										<Image
+											src={p.thumbnail}
+											alt={p.title}
+											fill
+											sizes="(max-width: 768px) 100vw, 33vw"
+											className="object-cover group-hover:scale-105 transition-transform duration-700"
+											placeholder="blur"
+											blurDataURL={BlurImage.src}
+										/>
+									</div>
+									<div className="p-5">
+										<h3 className="font-bold text-[#073A63] group-hover:text-[#0D6EBB] transition-colors">
+											{p.title}
+										</h3>
+										<p className="mt-1 text-xs text-gray-500">{p.year}</p>
+									</div>
+								</Link>
+							))}
+						</div>
+					</div>
+				</section>
+			)}
+		</main>
 	);
 }
-
-export default Page;

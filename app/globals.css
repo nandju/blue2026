@@ -62,13 +62,14 @@ span {
 }
 
 li {
-	@apply list-none relative;
+	list-style: none;
+	position: relative;
 }
 
 
 td,
 th {
-	@apply py-2 px-3;
+	padding: 0.5rem 0.75rem;
 }
 
 a[title]:hover:after {
@@ -99,6 +100,24 @@ a[title]:hover:after {
 	--blue-primary-light: rgba(13, 110, 187, 0.1);
 	--blue-primary-dark: #0a5a9a;
 	--blue-tertiary-light: rgba(13, 189, 159, 0.1);
+	--blue-navy: #062E52;
+	--blue-deep: #073A63;
+}
+
+/* Respect reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+	*,
+	*::before,
+	*::after {
+		animation-duration: 0.01ms !important;
+		animation-iteration-count: 1 !important;
+		transition-duration: 0.01ms !important;
+		scroll-behavior: auto !important;
+	}
+}
+
+html {
+	scroll-behavior: smooth;
 }
 
 /* Replace gray colors with BLUE palette */
