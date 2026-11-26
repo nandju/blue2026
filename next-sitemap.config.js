@@ -5,7 +5,7 @@ module.exports = {
 	siteUrl: process.env.NEXT_PUBLIC_SITE_URL || "https://www.bluemakers.net",
 	generateRobotsTxt: true,
 	generateIndexSitemap: false,
-	exclude: ["/404", "/500"],
+	exclude: ["/404", "/500", "/academy/connexion", "/academy/mon-espace", "/academy/*/payer"],
 	additionalPaths: async () => {
 		const now = new Date().toISOString();
 		const staticPages = [

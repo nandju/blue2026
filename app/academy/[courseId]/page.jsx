@@ -4,15 +4,16 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import {
-  getCourse,
   addRegistration,
+  getCourseAccess,
   getCourseProgress,
   setProgress,
-  getCourseQuizResult,
   addQuizResult,
   addCertificateRequest,
 } from "@/lib/store";
-import { QUIZ_DURATION_SECONDS, QUIZ_PASS_THRESHOLD, scoreQuiz } from "@/lib/academyRules";
+import { QUIZ_DURATION_SECONDS, QUIZ_PASS_THRESHOLD } from "@/lib/academyRules";
+import { useContent } from "@/components/SiteContentProvider";
+import MemberCta from "@/components/academy/MemberCta";
 
 const QUIZ_DURATION = QUIZ_DURATION_SECONDS;
 
@@ -265,21 +266,44 @@ function Quiz({ course, reg, onComplete }) {
   const handleSubmitRef = useRef();
   handleSubmitRef.current = (auto = false) => {
     clearInterval(timerRef.current);
-    // Affichage immédiat, puis remplacement par le résultat calculé et
-    // enregistré par le serveur (seul celui-ci fait foi pour le certificat).
-    const local = { courseId: course.id, email: reg.email, ...scoreQuiz(course.quiz, answers) };
-    setResult(local);
+    // Les bonnes réponses ne quittent jamais le serveur : le score est
+    // calculé et enregistré côté serveur, puis affiché ici (seul fait foi).
     setSubmitted(true);
-    addQuizResult({ courseId: course.id, email: reg.email, answers })
-      .then((saved) => setResult({ ...local, score: saved.score, correct: saved.correct, total: saved.total, passed: saved.passed }))
-      .catch(() => {});
+    setResult(null);
+    addQuizResult({ courseId: course.id, email: reg.email || "", answers })
+      .then((saved) => setResult({ courseId: course.id, email: reg.email, score: saved.score, correct: saved.correct, total: saved.total, passed: saved.passed }))
+      .catch((e) => setResult({ error: e.message || "La correction n'a pas pu être enregistrée. Réessayez." }));
   };
 
   const mm = String(Math.floor(timeLeft / 60)).padStart(2, "0");
   const ss = String(timeLeft % 60).padStart(2, "0");
   const timerColor = timeLeft < 120 ? "text-red-500" : "text-[var(--color-primary)]";
 
-  if (submitted && result) {
+  if (submitted) {
+    if (!result) {
+      return (
+        <div className="min-h-screen flex items-center justify-center px-4 py-24 bg-white">
+          <div className="text-center">
+            <div className="w-10 h-10 mx-auto rounded-full border-4 border-[var(--color-primary)] border-t-transparent animate-spin" />
+            <p className="mt-4 text-gray-500 text-sm">Correction en cours…</p>
+          </div>
+        </div>
+      );
+    }
+    if (result.error) {
+      return (
+        <div className="min-h-screen flex items-center justify-center px-4 py-24 bg-white">
+          <div className="max-w-md w-full text-center">
+            <div className="text-6xl mb-4">⚠️</div>
+            <p className="text-gray-600 mb-6">{result.error}</p>
+            <button onClick={() => setSubmitted(false)}
+              className="w-full border-2 border-[var(--color-primary)] text-[var(--color-primary)] rounded-xl py-3 font-semibold hover:bg-[rgb(var(--color-primary-rgb)/0.06)] transition-colors">
+              Retenter l&apos;envoi
+            </button>
+          </div>
+        </div>
+      );
+    }
     return (
       <div className="min-h-screen flex items-center justify-center px-4 py-24 bg-white">
         <motion.div className="max-w-md w-full text-center"
@@ -353,7 +377,7 @@ function Quiz({ course, reg, onComplete }) {
 }
 
 // ─── Stage: Certificate ────────────────────────────────────────────────────
-function CertificateStage({ course, reg, quizResult }) {
+function CertificateStage({ course, reg, quizResult, learner }) {
   const [officialRequested, setOfficialRequested] = useState(false);
   const [officialForm, setOfficialForm] = useState(false);
   const [paymentInfo, setPaymentInfo] = useState("");
@@ -449,6 +473,9 @@ function CertificateStage({ course, reg, quizResult }) {
           </div>
         </div>
 
+        {/* Incitation : l'apprenant payant peut devenir membre actif */}
+        {learner?.kind === "external" && <MemberCta className="mt-6" />}
+
         <div className="text-center mt-6">
           <Link href="/academy" className="text-[var(--color-primary)] text-sm hover:text-[var(--color-secondary)] transition-colors">
             ← Retour au catalogue des formations
@@ -459,31 +486,110 @@ function CertificateStage({ course, reg, quizResult }) {
   );
 }
 
+// ─── Stage: Paywall ────────────────────────────────────────────────────────
+// Formation payante devant un visiteur sans accès : trois choix clairs, ou
+// le message « il vous manque… » pour un membre non actif connecté.
+function Paywall({ course, paywall }) {
+  const t = useContent("academy.paywall") || {};
+  const price = (paywall?.price ?? course?.price_fcfa ?? 0).toLocaleString("fr-FR");
+  const payText = (t.payOption || "Payer cette formation — {prix} FCFA").replace("{prix}", price);
+
+  return (
+    <div className="min-h-screen flex items-center justify-center px-4 py-24 bg-[rgb(var(--color-primary-rgb)/0.04)]">
+      <motion.div className="w-full max-w-lg" initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ type: "spring" }}>
+        <div className="text-center mb-8">
+          <span className="text-5xl">🔒</span>
+          <h1 className="mt-4 text-2xl font-extrabold text-[var(--color-navy)]">
+            {t.title || "Cette formation est payante pour les non-membres"}
+          </h1>
+          <p className="mt-2 text-sm text-gray-500">
+            {course.title} — <strong className="text-[var(--color-primary)]">{price} FCFA</strong>
+          </p>
+          {paywall?.missingMessage ? (
+            <p className="mt-4 text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3">
+              {paywall.missingMessage}
+            </p>
+          ) : null}
+        </div>
+
+        <div className="space-y-3">
+          {/* 1. Membre BLUE → connexion */}
+          <Link
+            href={`/academy/connexion?retour=/academy/${course.id}`}
+            className="flex items-center justify-between gap-4 rounded-2xl bg-white border-2 border-[var(--color-primary)] px-5 py-4 hover:bg-[rgb(var(--color-primary-rgb)/0.05)] transition-colors">
+            <span className="text-sm font-semibold text-[var(--color-navy)]">
+              {t.loginOption || "Je suis membre BLUE — me connecter"}
+            </span>
+            <span className="text-[var(--color-primary)] font-bold">→</span>
+          </Link>
+
+          {/* 2. Devenir membre actif */}
+          <Link
+            href="/recrutement"
+            className="flex items-center justify-between gap-4 rounded-2xl bg-white border-2 border-[var(--color-secondary)] px-5 py-4 hover:bg-[rgb(var(--color-secondary-rgb)/0.05)] transition-colors">
+            <span className="text-sm font-semibold text-[var(--color-navy)]">
+              {t.memberOption || "Devenir membre actif — toutes les formations gratuites"}
+            </span>
+            <span className="text-[var(--color-secondary)] font-bold">→</span>
+          </Link>
+
+          {/* 3. Payer */}
+          <Link
+            href={`/academy/${course.id}/payer`}
+            className="flex items-center justify-between gap-4 rounded-2xl bg-[var(--color-primary)] px-5 py-4 hover:bg-[var(--color-secondary)] transition-colors">
+            <span className="text-sm font-semibold text-white">{payText}</span>
+            <span className="text-white font-bold">→</span>
+          </Link>
+        </div>
+
+        <MemberCta className="mt-8" />
+      </motion.div>
+    </div>
+  );
+}
+
 // ─── Main Page ─────────────────────────────────────────────────────────────
 export default function CourseDetailPage() {
   const { courseId } = useParams();
   const [course, setCourse] = useState(null);
-  const [stage, setStage] = useState("loading"); // loading | register | content | quiz | certificate
+  const [paywall, setPaywall] = useState(null);
+  const [learner, setLearner] = useState(null);
+  const [stage, setStage] = useState("loading"); // loading | notfound | paywall | register | content | quiz | certificate
   const [reg, setReg] = useState(null);
   const [quizResult, setQuizResult] = useState(null);
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const c = await getCourse(courseId);
+      const info = await getCourseAccess(courseId);
       if (cancelled) return;
-      if (!c) { setStage("notfound"); return; }
-      setCourse(c);
-      // Check if user already registered (try stored email)
-      const stored = typeof window !== "undefined" ? localStorage.getItem(`blue_reg_${courseId}`) : null;
-      if (stored) {
-        const r = JSON.parse(stored);
-        setReg(r);
-        const qr = await getCourseQuizResult(courseId, r.email).catch(() => null);
-        if (cancelled) return;
-        if (qr?.passed) { setQuizResult(qr); setStage("certificate"); }
+      if (!info?.course) { setStage("notfound"); return; }
+      setCourse(info.course);
+      setPaywall(info.paywall);
+      setLearner(info.learner || null);
+
+      // Pas d'accès → paywall (connecté ou non).
+      if (!info.access?.allowed) { setStage("paywall"); return; }
+
+      // Apprenant connecté : pas de formulaire d'inscription — les infos
+      // viennent de son compte. Son dernier résultat réussi ouvre le certificat.
+      if (info.learner) {
+        setReg({
+          firstName: info.learner.firstName,
+          lastName: info.learner.lastName,
+          email: info.learner.email || "",
+          whatsapp: info.learner.phone,
+          learnerId: info.learner.id,
+        });
+        if (info.lastResult?.passed) { setQuizResult(info.lastResult); setStage("certificate"); }
         else setStage("content");
-      } else { setStage("register"); }
+        return;
+      }
+
+      // Visiteur anonyme sur formation gratuite : parcours d'inscription classique.
+      const stored = typeof window !== "undefined" ? localStorage.getItem(`blue_reg_${courseId}`) : null;
+      if (stored) { setReg(JSON.parse(stored)); setStage("content"); }
+      else { setStage("register"); }
     })();
     return () => { cancelled = true; };
   }, [courseId]);
@@ -512,13 +618,14 @@ export default function CourseDetailPage() {
       <Link href="/academy" className="text-[var(--color-primary)] hover:underline">← Retour au catalogue</Link></div>
     </div>
   );
+  if (stage === "paywall") return <Paywall course={course} paywall={paywall} />;
 
   return (
     <>
       {stage === "register" && <RegistrationForm course={course} onComplete={handleRegistered} />}
       {stage === "content" && <CourseContent course={course} reg={reg} onFinish={handleContentFinish} />}
       {stage === "quiz" && <Quiz course={course} reg={reg} onComplete={handleQuizComplete} />}
-      {stage === "certificate" && <CertificateStage course={course} reg={reg} quizResult={quizResult} />}
+      {stage === "certificate" && <CertificateStage course={course} reg={reg} quizResult={quizResult} learner={learner} />}
     </>
   );
 }

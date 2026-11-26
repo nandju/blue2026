@@ -4,6 +4,8 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 
 import { getCourses } from "@/lib/store";
+import { useContent } from "@/components/SiteContentProvider";
+import LearnerBanner from "@/components/academy/LearnerBanner";
 import PageHero from "@/components/PageHero";
 import SectionHeader from "@/components/SectionHeader";
 
@@ -27,6 +29,8 @@ const PERKS = [
 ];
 
 export default function AcademyPage() {
+  const memberBanner = useContent("academy.memberBanner") || {};
+  const cardTexts = useContent("academy.cards") || {};
   const [courses, setCourses] = useState(null);
   const [error, setError] = useState(false);
   const [search, setSearch] = useState("");
@@ -55,6 +59,7 @@ export default function AcademyPage() {
 
   return (
     <main className="min-h-screen bg-white overflow-x-hidden">
+      <LearnerBanner />
       <PageHero
         image={HeroImg}
         eyebrow="Blue Academy"
@@ -71,6 +76,21 @@ export default function AcademyPage() {
               {p}
             </p>
           ))}
+        </div>
+      </section>
+
+      {/* Bannière membres actifs */}
+      <section className="bg-[rgb(var(--color-secondary-rgb)/0.1)] border-b border-[rgb(var(--color-secondary-rgb)/0.2)]">
+        <div className="mx-auto max-w-6xl px-6 md:px-8 py-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+          <p className="text-sm font-semibold text-[var(--color-navy)] flex items-center gap-2">
+            <span className="text-lg">🎓</span>
+            {memberBanner.text || "Membres actifs : toutes les formations sont gratuites"}
+          </p>
+          <Link
+            href={memberBanner.cta?.href || "/recrutement"}
+            className="shrink-0 rounded-full bg-[var(--color-primary)] px-5 py-2 text-xs font-bold text-white hover:bg-[var(--color-secondary)] transition-colors">
+            {memberBanner.cta?.label || "Devenir membre"}
+          </Link>
         </div>
       </section>
 
@@ -171,6 +191,15 @@ export default function AcademyPage() {
                         <span className={`text-xs font-medium px-3 py-1 rounded-full ${levelColor[course.level] || "bg-gray-100 text-gray-600"}`}>
                           {course.level}
                         </span>
+                        {(course.price_fcfa || 0) > 0 ? (
+                          <span className="text-xs font-bold px-3 py-1 rounded-full bg-amber-50 text-amber-700" title={cardTexts.freeForMembers || "Gratuit pour les membres"}>
+                            {cardTexts.freeForMembers || "Gratuit pour les membres"} · {Number(course.price_fcfa).toLocaleString("fr-FR")} FCFA
+                          </span>
+                        ) : (
+                          <span className="text-xs font-bold px-3 py-1 rounded-full bg-emerald-50 text-emerald-700">
+                            {cardTexts.free || "Gratuit"}
+                          </span>
+                        )}
                         <span className="text-gray-400 text-xs">⏱ {course.duration}</span>
                       </div>
                       <h3 className="text-gray-900 font-bold text-base mb-2 group-hover:text-[var(--color-primary)] transition-colors leading-snug">{course.title}</h3>

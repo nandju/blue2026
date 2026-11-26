@@ -2,20 +2,24 @@
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  getCourses, addCourse, updateCourse, deleteCourse,
+  getAdminCourses, addCourse, updateCourse, deleteCourse,
   getCertificateRequests, updateCertificateRequest,
 } from "@/lib/store";
 import seedCourses from "@/lib/data/seed/courses.json";
 import LastModified from "@/components/admin/LastModified";
 import { inputCls, labelCls, btnPrimary } from "@/components/admin/ui";
+import PaymentsPanel from "@/components/admin/formations/PaymentsPanel";
+import PaymentSettingsPanel from "@/components/admin/formations/PaymentSettingsPanel";
 
 const TABS = [
   { id: "formations", label: "Formations" },
   { id: "certificats", label: "Demandes de certificats" },
+  { id: "paiements", label: "Paiements" },
+  { id: "reglages", label: "Réglages de paiement" },
 ];
 
 // ─── Formations ────────────────────────────────────────────────────────────
-const EMPTY_COURSE = { id: "", title: "", description: "", category: "environnement", level: "Débutant", duration: "", video: "", sections: [], resources: [], quiz: [], enrolled: 0 };
+const EMPTY_COURSE = { id: "", title: "", description: "", category: "environnement", level: "Débutant", duration: "", video: "", sections: [], resources: [], quiz: [], enrolled: 0, price_fcfa: 0 };
 const sectionsToText = (sections = []) => sections.map((s) => `${s.title}|${s.content}`).join("\n---\n");
 const quizToText = (quiz = []) => quiz.map((q) => `${q.question}|${q.options.join(",")}|${q.answer}`).join("\n");
 
@@ -31,7 +35,7 @@ function CourseManagement() {
 
   const load = useCallback(() => {
     setLoadError("");
-    getCourses().then(setCourses).catch((e) => setLoadError(e.message));
+    getAdminCourses().then(setCourses).catch((e) => setLoadError(e.message));
   }, []);
   useEffect(() => { load(); }, [load]);
 
@@ -118,7 +122,12 @@ function CourseManagement() {
               </div>
               <div className="flex-1 min-w-0">
                 <p className="font-semibold text-gray-900 truncate">{c.title}</p>
-                <p className="text-gray-500 text-xs mt-0.5">{c.level} · {c.duration} · {c.enrolled || 0} inscrits</p>
+                <p className="text-gray-500 text-xs mt-0.5">
+                  {c.level} · {c.duration} · {c.enrolled || 0} inscrits
+                  {(c.price_fcfa || 0) > 0
+                    ? ` · ${Number(c.price_fcfa).toLocaleString("fr-FR")} FCFA (gratuit pour les membres actifs)`
+                    : " · Gratuite"}
+                </p>
                 <LastModified at={c.updated_by ? c.updated_at : null} by={c.updated_by} className="mt-0.5" />
               </div>
             </div>
@@ -162,6 +171,12 @@ function CourseManagement() {
                       <option>Débutant</option><option>Intermédiaire</option><option>Avancé</option>
                     </select>
                   </div>
+                </div>
+                <div>
+                  <label className={labelCls}>Prix pour les non-membres (FCFA) — 0 = gratuite pour tout le monde</label>
+                  <input type="number" min="0" step="500" value={form.price_fcfa ?? 0}
+                    onChange={(e) => setForm((f) => ({ ...f, price_fcfa: Number(e.target.value) || 0 }))} className={inputCls} />
+                  <p className="text-[11px] text-gray-400 mt-1">Les membres actifs accèdent toujours gratuitement à toutes les formations.</p>
                 </div>
                 <div>
                   <label className={labelCls}>Sections (format : Titre|Contenu, séparées par une ligne ---)</label>
@@ -292,7 +307,10 @@ export default function AdminCoursesPage() {
       </div>
       <AnimatePresence mode="wait">
         <motion.div key={tab} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
-          {tab === "formations" ? <CourseManagement /> : <CertificateManagement />}
+          {tab === "formations" ? <CourseManagement />
+            : tab === "certificats" ? <CertificateManagement />
+            : tab === "paiements" ? <PaymentsPanel />
+            : <PaymentSettingsPanel />}
         </motion.div>
       </AnimatePresence>
     </div>

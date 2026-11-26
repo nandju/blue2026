@@ -5,6 +5,7 @@ import { apiHandler, parseJson } from "@/lib/apiHandler";
 import { courseUpdateSchema } from "@/lib/validation";
 import { logAdminAction, diffFields } from "@/lib/adminLog.server";
 import { ACTIONS, MODULES } from "@/lib/adminLogConstants";
+import { stripCourseSecrets } from "@/lib/publicCourse";
 
 const COURSE_LABELS = {
   title: "Titre",
@@ -22,7 +23,8 @@ export const GET = apiHandler(async (req, { params }) => {
   const { id } = await params;
   const course = await courses.get(id);
   if (!course) return NextResponse.json({ error: "Formation introuvable" }, { status: 404 });
-  return NextResponse.json(course);
+  // Route publique : jamais les bonnes réponses ni les explications du quiz.
+  return NextResponse.json(stripCourseSecrets(course));
 });
 
 export const PATCH = apiHandler(async (req, { params }) => {

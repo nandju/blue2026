@@ -55,6 +55,8 @@ export default function AdminDashboardPage() {
         <StatCard label="Recrutements ouverts" value={stats?.recruitment?.open} icon="📣" href="/admin/recrutement" />
         <StatCard label="Candidatures (7 j)" value={stats?.recruitment?.submissions7d} icon="📝" color="#0DBD9F" href="/admin/recrutement" />
         <StatCard label="Prochaine clôture" value={stats?.recruitment?.nextClosing ? new Date(stats.recruitment.nextClosing).toLocaleDateString("fr-FR") : "—"} icon="📅" color="#f59e0b" href="/admin/recrutement" />
+        <StatCard label="Membres" value={stats?.members} icon="🪪" href="/admin/membres" />
+        <StatCard label="Paiements en attente" value={stats?.pendingPayments} icon="💳" color="#f59e0b" href="/admin/formations?onglet=paiements" />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

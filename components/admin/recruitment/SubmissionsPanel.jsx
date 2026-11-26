@@ -104,15 +104,18 @@ function DetailPanel({ sid, form, onClose, onChanged, onError }) {
 				</div>
 			)}
 
-			{/* Convertir en membre — phase 5 */}
+			{/* Convertir en membre — préremplit la fiche membre (phase 5) */}
 			<div className="pt-3 border-t border-gray-100 flex items-center gap-3">
-				<button
-					disabled
-					title={JSON.stringify(draft, null, 2)}
-					className={btnSecondary + " opacity-60 cursor-not-allowed"}>
-					👥 Convertir en membre BLUE
-				</button>
-				<span className="text-xs text-gray-400">Disponible en phase 5</span>
+				{s.status === "accepted" ? (
+					<a
+						href={`/admin/membres?from=${s.id}`}
+						title={JSON.stringify(draft, null, 2)}
+						className={btnSecondary}>
+						👥 Convertir en membre BLUE
+					</a>
+				) : (
+					<span className="text-xs text-gray-400">Le bouton « Convertir en membre » est disponible sur une candidature acceptée.</span>
+				)}
 			</div>
 
 			<button

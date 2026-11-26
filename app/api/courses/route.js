@@ -5,9 +5,11 @@ import { apiHandler, parseJson } from "@/lib/apiHandler";
 import { courseCreateSchema } from "@/lib/validation";
 import { logAdminAction } from "@/lib/adminLog.server";
 import { ACTIONS, MODULES } from "@/lib/adminLogConstants";
+import { stripCourseSecrets } from "@/lib/publicCourse";
 
 export const GET = apiHandler(async () => {
-  return NextResponse.json(await courses.list());
+  // Route publique : les bonnes réponses du quiz ne sont jamais exposées.
+  return NextResponse.json((await courses.list()).map(stripCourseSecrets));
 });
 
 export const POST = apiHandler(async (req) => {
