@@ -1,11 +1,14 @@
 "use client";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
+import Image from "next/image";
 import Link from "next/link";
 
 import { getVolunteer } from "@/lib/store";
 import { useContent } from "@/components/SiteContentProvider";
 import SectionHeader from "@/components/SectionHeader";
+
+const isExternal = (src) => /^https?:\/\//.test(src || "");
 
 export default function VolunteerSection() {
 	const c = useContent("home.volunteer");
@@ -14,7 +17,7 @@ export default function VolunteerSection() {
 
 	useEffect(() => {
 		getVolunteer()
-			.then((v) => setVolunteer(v))
+			.then((d) => setVolunteer(d?.volunteer || null))
 			.catch(() => setVolunteer(null))
 			.finally(() => setLoaded(true));
 	}, []);
@@ -41,7 +44,7 @@ export default function VolunteerSection() {
 								</div>
 							</div>
 						</div>
-					) : volunteer && volunteer.active ? (
+					) : volunteer?.published ? (
 						<motion.div
 							className="mx-auto max-w-4xl bg-white rounded-3xl border border-[var(--color-primary)]/10 shadow-xl overflow-hidden"
 							initial={{ opacity: 0, y: 30 }}
@@ -51,10 +54,16 @@ export default function VolunteerSection() {
 							<div className="grid md:grid-cols-[300px_1fr]">
 								{/* Portrait */}
 								<div className="relative bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-secondary)] flex items-center justify-center p-10">
-									<div className="w-36 h-36 rounded-full border-4 border-white/60 shadow-xl overflow-hidden bg-white/20 flex items-center justify-center">
+									<div className="relative w-36 h-36 rounded-full border-4 border-white/60 shadow-xl overflow-hidden bg-white/20 flex items-center justify-center">
 										{volunteer.photo ? (
-											// eslint-disable-next-line @next/next/no-img-element
-											<img src={volunteer.photo} alt={`${volunteer.firstName} ${volunteer.lastName}`} className="w-full h-full object-cover" />
+											<Image
+												src={volunteer.photo}
+												alt={`${volunteer.firstName} ${volunteer.lastName}`}
+												fill
+												sizes="144px"
+												unoptimized={isExternal(volunteer.photo)}
+												className="object-cover"
+											/>
 										) : (
 											<span className="text-white text-4xl font-extrabold">
 												{(volunteer.firstName?.[0] || "") + (volunteer.lastName?.[0] || "")}
