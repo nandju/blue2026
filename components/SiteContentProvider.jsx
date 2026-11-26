@@ -8,7 +8,7 @@ export function SiteContentProvider({ value, children }) {
   return <SiteContext.Provider value={value}>{children}</SiteContext.Provider>;
 }
 
-/** Lit un nœud du contenu : useContent("home.hero"), useContent("shared.zones.list"). */
+/** Lit un nœud du contenu : useContent("home.hero"), useContent("shared.navbar"). */
 export function useContent(path) {
   const { content } = useContext(SiteContext);
   if (!path) return content;

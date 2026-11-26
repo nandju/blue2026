@@ -1,4 +1,4 @@
-const { getCoursesForSitemap, getProjectsForSitemap } = require("./lib/sitemapCourses.cjs");
+const { getCoursesForSitemap, getProjectsForSitemap, getRecruitmentsForSitemap } = require("./lib/sitemapCourses.cjs");
 
 /** @type {import('next-sitemap').IConfig} */
 module.exports = {
@@ -14,6 +14,7 @@ module.exports = {
 			{ path: "/projects", priority: 0.9, changefreq: "weekly" },
 			{ path: "/projects/archive", priority: 0.7, changefreq: "monthly" },
 			{ path: "/academy", priority: 0.9, changefreq: "weekly" },
+			{ path: "/recrutement", priority: 0.8, changefreq: "daily" },
 		];
 		const projects = await getProjectsForSitemap();
 		const projectPages = projects.map((project) => ({
@@ -29,7 +30,14 @@ module.exports = {
 			changefreq: "weekly",
 		}));
 
-		return [...staticPages, ...projectPages, ...coursePages].map((page) => ({
+		const recruitments = await getRecruitmentsForSitemap();
+		const recruitmentPages = recruitments.map((r) => ({
+			path: `/recrutement/${r.slug}`,
+			priority: 0.8,
+			changefreq: "daily",
+		}));
+
+		return [...staticPages, ...projectPages, ...coursePages, ...recruitmentPages].map((page) => ({
 			loc: page.path,
 			changefreq: page.changefreq,
 			priority: page.priority,

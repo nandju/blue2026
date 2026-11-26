@@ -52,6 +52,9 @@ export default function AdminDashboardPage() {
         <StatCard label="Conversations MR BLUE" value={stats?.conversations} icon="💬" color="#0DBD9F" href="/admin/mr-blue" />
         <StatCard label="Bénévole du mois actif" value={stats?.volunteers} icon="🌟" href="/admin/benevole-du-mois" />
         <StatCard label="Demandes en attente" value={pending} icon="⏳" color="#f59e0b" href="/admin/formations?onglet=certificats" />
+        <StatCard label="Recrutements ouverts" value={stats?.recruitment?.open} icon="📣" href="/admin/recrutement" />
+        <StatCard label="Candidatures (7 j)" value={stats?.recruitment?.submissions7d} icon="📝" color="#0DBD9F" href="/admin/recrutement" />
+        <StatCard label="Prochaine clôture" value={stats?.recruitment?.nextClosing ? new Date(stats.recruitment.nextClosing).toLocaleDateString("fr-FR") : "—"} icon="📅" color="#f59e0b" href="/admin/recrutement" />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

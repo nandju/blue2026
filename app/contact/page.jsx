@@ -1,6 +1,7 @@
 "use client";
 import { useEffect } from "react";
 import { motion } from "framer-motion";
+import Link from "next/link";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
 	faFacebookF,
@@ -15,6 +16,7 @@ import {
 	faEnvelope,
 	faLocationDot,
 	faComments,
+	faArrowRight,
 } from "@fortawesome/free-solid-svg-icons";
 
 import PageHero, { HeroButton } from "@/components/PageHero";
@@ -32,9 +34,8 @@ const SOCIAL_ICONS = {
 
 export default function ContactPage() {
 	const c = useContent("contact") || {};
-	const zones = useContent("shared.zones.list") || [];
 	const { contact = {}, socials = {} } = useSiteSettings();
-	const { hero = {}, channels = {}, zones: zonesSec = {}, mrblue = {} } = c;
+	const { hero = {}, channels = {}, recruit = {}, mrblue = {} } = c;
 
 	useEffect(() => {
 		window.scrollTo(0, 0);
@@ -140,37 +141,29 @@ export default function ContactPage() {
 				</div>
 			</section>
 
-			{/* Groupes WhatsApp */}
+			{/* Rejoindre BLUE via la page Recrutement */}
 			<section className="py-20 md:py-24 bg-[#f4f9fd]">
 				<div className="mx-auto max-w-7xl px-6 md:px-8">
 					<SectionHeader
-						eyebrow={zonesSec.eyebrow}
-						title={zonesSec.title}
-						description={zonesSec.description}
+						eyebrow={recruit.eyebrow}
+						title={recruit.title}
+						description={recruit.description}
 					/>
-					<div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
-						{zones.map((z, i) => (
-							<motion.a
-								key={`${z.name}-${i}`}
-								href={z.link}
-								target="_blank"
-								rel="noopener noreferrer"
-								className="group bg-white rounded-3xl border border-[var(--color-primary)]/10 p-7 hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
-								initial={{ opacity: 0, y: 30 }}
-								whileInView={{ opacity: 1, y: 0 }}
-								viewport={{ once: true, margin: "-60px" }}
-								transition={{ delay: i * 0.1, duration: 0.5 }}>
-								<span className="inline-flex w-12 h-12 rounded-2xl bg-[#25D366]/15 text-[#25D366] items-center justify-center text-2xl">
-									<FontAwesomeIcon icon={faWhatsapp} />
-								</span>
-								<h3 className="mt-4 text-lg font-bold text-[var(--color-dark)]">{z.name}</h3>
-								<p className="mt-2 text-sm text-gray-600 leading-relaxed">{z.areas}</p>
-								<span className="mt-4 inline-block text-sm font-semibold text-[var(--color-primary)] group-hover:text-[var(--color-secondary)] transition-colors">
-									{zonesSec.ctaLabel || "Rejoindre →"}
-								</span>
-							</motion.a>
-						))}
-					</div>
+					<motion.div
+						className="mt-12 max-w-2xl mx-auto bg-white rounded-3xl border border-[var(--color-primary)]/10 p-8 text-center"
+						initial={{ opacity: 0, y: 30 }}
+						whileInView={{ opacity: 1, y: 0 }}
+						viewport={{ once: true, margin: "-60px" }}
+						transition={{ duration: 0.5 }}>
+						{recruit.cta?.href && (
+							<Link
+								href={recruit.cta.href}
+								className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-secondary)] text-white px-8 py-3 text-sm font-semibold hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300">
+								{recruit.cta.label}
+								<FontAwesomeIcon icon={faArrowRight} />
+							</Link>
+						)}
+					</motion.div>
 				</div>
 			</section>
 

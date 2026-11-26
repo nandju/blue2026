@@ -1,21 +1,11 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import Link from "next/link";
 import { addChatUser, getChatUserBySession, addChatMessage } from "@/lib/store";
-import { useContent, useSiteSettings } from "@/components/SiteContentProvider";
+import { useSiteSettings } from "@/components/SiteContentProvider";
 
 const SESSION_KEY = "mr_blue_session";
-const NORD = ["cocody", "yopougon", "abobo", "attécoubé", "attecoube", "anyama", "plateau", "bingerville"];
-const SUD  = ["marcory", "treichville", "koumassi", "port-bouet", "port-bouët"];
-
-function getWhatsApp(location, zones) {
-  if (!location) return null;
-  const l = location.toLowerCase();
-  const find = (kw) => (zones || []).find((z) => z?.name?.toLowerCase().includes(kw) && z?.link);
-  if (NORD.some((c) => l.includes(c))) return find("nord") ? { zone: find("nord").name, link: find("nord").link } : null;
-  if (SUD.some((c) => l.includes(c))) return find("sud") ? { zone: find("sud").name, link: find("sud").link } : null;
-  return null;
-}
 
 function genSession() {
   return `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
@@ -45,11 +35,23 @@ const formatText = (text) => {
   if (!text) return null;
   return text.split("\n").map((line, i, arr) => (
     <span key={i}>
-      {line.split(/(https?:\/\/[^\s]+|\*\*[^*]+\*\*)/g).map((part, j) => {
+      {line.split(/(https?:\/\/[^\s]+|\/[\w\-/]*|\*\*[^*]+\*\*)/g).map((part, j) => {
+        // Les URL ne s'affichent jamais en clair : bouton « Ouvrir le lien ↗ ».
         if (/^https?:\/\//.test(part)) {
           return (
             <a key={j} href={part} target="_blank" rel="noopener noreferrer"
-              className="underline text-[var(--color-secondary)] break-all hover:opacity-80">{part}</a>
+              className="inline-flex items-center gap-1 mt-1 mb-0.5 px-3 py-1 rounded-lg bg-[rgb(var(--color-primary-rgb)/0.08)] text-[var(--color-primary)] text-xs font-semibold hover:bg-[rgb(var(--color-primary-rgb)/0.16)] transition-colors">
+              Ouvrir le lien ↗
+            </a>
+          );
+        }
+        // Liens internes /... : même onglet.
+        if (/^\/[\w\-/]+$/.test(part)) {
+          return (
+            <a key={j} href={part}
+              className="inline-flex items-center gap-1 mt-1 mb-0.5 px-3 py-1 rounded-lg bg-[rgb(var(--color-primary-rgb)/0.08)] text-[var(--color-primary)] text-xs font-semibold hover:bg-[rgb(var(--color-primary-rgb)/0.16)] transition-colors">
+              Ouvrir le lien ↗
+            </a>
           );
         }
         if (/^\*\*[^*]+\*\*$/.test(part)) {
@@ -70,7 +72,6 @@ const SUGGESTIONS = [
 ];
 
 export default function MrBlueChat() {
-  const zones = useContent("shared.zones.list") || [];
   const siteContact = useSiteSettings().contact || {};
   const [isOpen,      setIsOpen]      = useState(false);
   const [messages,    setMessages]    = useState([]);
@@ -162,10 +163,9 @@ export default function MrBlueChat() {
         ? "Bienvenue parmi nous ! En tant que membre, je suis là pour vous accompagner avec toutes les informations dont vous avez besoin."
         : "Je suis ravi de vous accueillir ! Je vous guiderai pour rejoindre BLUE et découvrir nos actions.";
       await botDelay(`Merci beaucoup ${newInfo.firstName} ! 🙏\n\n${memberMsg}\n\nJe suis maintenant prêt à répondre à toutes vos questions sur BLUE, nos programmes, nos formations ou comment nous rejoindre.\n\nComment puis-je vous aider aujourd'hui ?`, 1000);
-      const wa = getWhatsApp(newInfo.location, zones);
-      if (wa && !newInfo.isMember) {
+      if (!newInfo.isMember) {
         setTimeout(() => {
-          setMessages((p) => [...p, { id: uid(), role: "assistant", content: `🌍 Vous appartenez à la zone **${wa.zone}**.\n\nVoici votre groupe officiel BLUE pour rejoindre la communauté :`, time: new Date(), waLink: wa.link, waZone: wa.zone }]);
+          setMessages((p) => [...p, { id: uid(), role: "assistant", content: "Toutes nos candidatures passent par la page Recrutement :", time: new Date(), recruitLink: true }]);
         }, 2400);
       }
       setOnboardDone(true);
@@ -338,13 +338,13 @@ export default function MrBlueChat() {
                       ? "bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-primary-dark)] text-white rounded-br-sm shadow-md"
                       : "bg-white text-gray-800 rounded-bl-sm shadow-sm border border-[rgb(var(--color-primary-rgb)/0.08)]"
                   }`}>
-                    {msg.waLink ? (
+                    {msg.recruitLink ? (
                       <div>
                         {formatText(msg.content)}
-                        <a href={msg.waLink} target="_blank" rel="noopener noreferrer"
-                          className="mt-2 flex items-center gap-2 bg-[#25D366] text-white rounded-xl px-3 py-2 text-xs font-semibold hover:bg-[#20c05c] transition-colors">
-                          <span>📱</span> Rejoindre {msg.waZone}
-                        </a>
+                        <Link href="/recrutement"
+                          className="mt-2 flex items-center gap-2 bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-secondary)] text-white rounded-xl px-3 py-2 text-xs font-semibold hover:opacity-90 transition-opacity">
+                          <span>📣</span> Voir les recrutements en cours
+                        </Link>
                       </div>
                     ) : (
                       <>

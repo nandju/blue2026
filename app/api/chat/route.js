@@ -1,6 +1,8 @@
 import { groq } from "@ai-sdk/groq";
 import { streamText } from "ai";
 import { chatRequestSchema } from "@/lib/validation";
+import { recruitment } from "@/lib/data";
+import { computeStatus } from "@/lib/recruitmentModel";
 
 export const maxDuration = 30;
 
@@ -50,21 +52,13 @@ CONTACTS OFFICIELS
 - Email: blue@bluemakers.net
 - Pays: Côte d'Ivoire
 
-GROUPES WHATSAPP PAR ZONE GÉOGRAPHIQUE
-Zone ABIDJAN NORD (Cocody, Yopougon, Abobo, Attécoubé, Anyama, Plateau, Bingerville):
-→ Lien: https://chat.whatsapp.com/CTyNHv6t1VJ22htKymlt4w
-
-Zone ABIDJAN SUD (Marcory, Treichville, Koumassi, Port-Bouët):
-→ Lien: https://chat.whatsapp.com/Cl0LSqe35hBFjuLPPV13nm
-
-Si la commune n'est pas reconnue: demander de préciser la commune ou la ville.
-
 PROCESSUS DE RECRUTEMENT (Devenir bénévole BLUE)
-1. Rejoindre le groupe WhatsApp correspondant à sa zone
-2. Participer aux activités organisées
-3. Acheter le t-shirt officiel BLUE (5000 FCFA)
-4. Participer à au moins deux activités officielles
-5. Être intégré progressivement dans la communauté BLUE
+1. Postuler via la page /recrutement du site (bénévolat, bureau, ambassadeur, stage, partenariat)
+2. Participer à au moins deux activités officielles
+3. Se procurer le t-shirt officiel BLUE (5000 FCFA)
+4. Être intégré progressivement dans la communauté BLUE
+
+Il n'existe plus de groupes WhatsApp de recrutement par zone : tout passe par /recrutement.
 
 BLUE ACADEMY
 - Plateforme de formations en ligne de BLUE
@@ -110,9 +104,24 @@ export async function POST(req) {
     ? `\n\n---\nPROFIL DE L'UTILISATEUR ACTUEL:\n- Nom: ${userInfo.lastName} ${userInfo.firstName}\n- Âge: ${userInfo.age} ans\n- Localité: ${userInfo.location}\n- Profession: ${userInfo.job}\n- Motivation: ${userInfo.motivation}\n- Statut: ${userInfo.isMember ? "DÉJÀ MEMBRE DE BLUE" : "NOUVEAU VISITEUR (pas encore membre)"}\n---\n${userInfo.isMember ? "Cet utilisateur est déjà membre de BLUE. Tu peux être plus informel, amical et partager des actualités. Il connaît déjà l'organisation." : "Cet utilisateur n'est pas encore membre de BLUE. Encourage-le à rejoindre BLUE, explique le processus de recrutement, mais reste professionnel."}\nUtilise son prénom (${userInfo.firstName}) pour personnaliser tes réponses.`
     : "";
 
+  // Recrutements actuellement ouverts (titre + lien interne ; jamais les URL
+  // des boutons-liens, qui restent masquées derrière /go/...).
+  let recContext = "";
+  try {
+    const forms = await recruitment.list();
+    const open = forms.filter((f) => computeStatus(f, f.submissionCount || 0) === "open");
+    if (open.length) {
+      recContext = `\n\n---\nRECRUTEMENTS ACTUELLEMENT OUVERTS:\n${open
+        .map((f) => `- ${f.title} (${f.type === "Autre" && f.typeOther ? f.typeOther : f.type}) → /recrutement/${f.slug}`)
+        .join("\n")}\nIndique ces liens aux visiteurs intéressés. Ne partage jamais les URL des boutons-liens (elles sont masquées).`;
+    }
+  } catch {
+    // La liste ne doit jamais faire échouer le chat.
+  }
+
   const result = await streamText({
     model: groq("openai/gpt-oss-120b"),
-    system: SYSTEM_PROMPT + userContext,
+    system: SYSTEM_PROMPT + userContext + recContext,
     messages,
     maxTokens: 600,
     temperature: 0.7,
