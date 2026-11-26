@@ -1,27 +1,19 @@
 import { NextResponse } from "next/server";
-import { getRegistrationsServer, addRegistrationServer, isRegisteredServer } from "@/lib/db/academy.server";
+import { registrations, courses, NotFoundError } from "@/lib/data";
 import { requireAdmin } from "@/lib/apiAuth";
+import { apiHandler, parseJson } from "@/lib/apiHandler";
+import { registrationSchema } from "@/lib/validation";
 
-export async function GET(req) {
+export const GET = apiHandler(async () => {
   const unauthorized = await requireAdmin();
   if (unauthorized) return unauthorized;
+  return NextResponse.json(await registrations.list());
+});
 
-  const registrations = await getRegistrationsServer();
-  return NextResponse.json(registrations);
-}
-
-export async function POST(req) {
-  const body = await req.json();
-  const { courseId, firstName, lastName, whatsapp, email } = body;
-  if (!courseId || !firstName || !lastName || !whatsapp || !email) {
-    return NextResponse.json({ error: "Champs requis manquants" }, { status: 400 });
-  }
-
-  const already = await isRegisteredServer(courseId, email);
-  if (already) {
-    return NextResponse.json({ error: "Déjà inscrit à cette formation" }, { status: 409 });
-  }
-
-  const registration = await addRegistrationServer(body);
+export const POST = apiHandler(async (req) => {
+  const body = await parseJson(req, registrationSchema);
+  if (!(await courses.get(body.courseId))) throw new NotFoundError("Formation introuvable");
+  // Lève ConflictError (409 « Déjà inscrit à cette formation ») si besoin.
+  const registration = await registrations.add(body);
   return NextResponse.json(registration, { status: 201 });
-}
+});

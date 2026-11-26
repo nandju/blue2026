@@ -41,3 +41,7 @@ env.download
 
 *.zip
 *.rar
+
+# BLUE : données locales et fichiers téléversés (pilote DATA_DRIVER=local)
+/data/
+/public/uploads/

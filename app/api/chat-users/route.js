@@ -1,27 +1,25 @@
 import { NextResponse } from "next/server";
-import { getChatUsersServer, getChatUserBySessionServer, addChatUserServer } from "@/lib/db/chat.server";
+import { chat } from "@/lib/data";
 import { requireAdmin } from "@/lib/apiAuth";
+import { apiHandler, parseJson } from "@/lib/apiHandler";
+import { chatUserSchema } from "@/lib/validation";
 
-export async function GET(req) {
+export const GET = apiHandler(async (req) => {
   const { searchParams } = new URL(req.url);
   const sessionId = searchParams.get("sessionId");
 
   if (sessionId) {
-    const user = await getChatUserBySessionServer(sessionId);
-    return NextResponse.json(user);
+    if (sessionId.length > 100) return NextResponse.json({ error: "sessionId invalide" }, { status: 400 });
+    return NextResponse.json(await chat.getUserBySession(sessionId));
   }
 
   const unauthorized = await requireAdmin();
   if (unauthorized) return unauthorized;
-  const users = await getChatUsersServer();
-  return NextResponse.json(users);
-}
+  return NextResponse.json(await chat.listUsers());
+});
 
-export async function POST(req) {
-  const userData = await req.json();
-  if (!userData.sessionId) {
-    return NextResponse.json({ error: "sessionId requis" }, { status: 400 });
-  }
-  const user = await addChatUserServer(userData);
+export const POST = apiHandler(async (req) => {
+  const userData = await parseJson(req, chatUserSchema);
+  const user = await chat.addUser(userData);
   return NextResponse.json(user, { status: 201 });
-}
+});

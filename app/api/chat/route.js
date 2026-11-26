@@ -1,5 +1,6 @@
 import { groq } from "@ai-sdk/groq";
 import { streamText } from "ai";
+import { chatRequestSchema } from "@/lib/validation";
 
 export const maxDuration = 30;
 
@@ -93,7 +94,17 @@ export async function POST(req) {
     );
   }
 
-  const { messages, userInfo } = await req.json();
+  let body;
+  try {
+    body = await req.json();
+  } catch {
+    return new Response("Requête invalide.", { status: 400 });
+  }
+  const parsed = chatRequestSchema.safeParse(body);
+  if (!parsed.success) {
+    return new Response(`Requête invalide : ${parsed.error.issues[0]?.message || "données incorrectes"}.`, { status: 400 });
+  }
+  const { messages, userInfo } = parsed.data;
 
   const userContext = userInfo
     ? `\n\n---\nPROFIL DE L'UTILISATEUR ACTUEL:\n- Nom: ${userInfo.lastName} ${userInfo.firstName}\n- Âge: ${userInfo.age} ans\n- Localité: ${userInfo.location}\n- Profession: ${userInfo.job}\n- Motivation: ${userInfo.motivation}\n- Statut: ${userInfo.isMember ? "DÉJÀ MEMBRE DE BLUE" : "NOUVEAU VISITEUR (pas encore membre)"}\n---\n${userInfo.isMember ? "Cet utilisateur est déjà membre de BLUE. Tu peux être plus informel, amical et partager des actualités. Il connaît déjà l'organisation." : "Cet utilisateur n'est pas encore membre de BLUE. Encourage-le à rejoindre BLUE, explique le processus de recrutement, mais reste professionnel."}\nUtilise son prénom (${userInfo.firstName}) pour personnaliser tes réponses.`

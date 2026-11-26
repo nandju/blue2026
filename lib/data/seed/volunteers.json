@@ -1,0 +1,15 @@
+[
+  {
+    "id": 1,
+    "firstName": "Amenan",
+    "lastName": "Kouassi",
+    "location": "Abidjan, Côte d'Ivoire",
+    "photo": null,
+    "actions": "Organisation de 12 collectes de nettoyage, sensibilisation de 500 personnes dans les quartiers d'Abobo et d'Adjamé.",
+    "contribution": "Collecte de 2 tonnes de plastique, formation de 30 jeunes ambassadeurs environnementaux.",
+    "period": "2024-01-01T00:00:00.000Z",
+    "active": true,
+    "updatedAt": null,
+    "updatedBy": null
+  }
+]

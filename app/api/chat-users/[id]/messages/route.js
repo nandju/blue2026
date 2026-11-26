@@ -1,22 +1,20 @@
 import { NextResponse } from "next/server";
-import { getChatMessagesServer, addChatMessageServer } from "@/lib/db/chat.server";
+import { chat } from "@/lib/data";
 import { requireAdmin } from "@/lib/apiAuth";
+import { apiHandler, parseJson } from "@/lib/apiHandler";
+import { chatMessageSchema } from "@/lib/validation";
 
-export async function GET(req, { params }) {
+export const GET = apiHandler(async (req, { params }) => {
   const unauthorized = await requireAdmin();
   if (unauthorized) return unauthorized;
 
   const { id } = await params;
-  const messages = await getChatMessagesServer(id);
-  return NextResponse.json(messages);
-}
+  return NextResponse.json(await chat.listMessages(id));
+});
 
-export async function POST(req, { params }) {
+export const POST = apiHandler(async (req, { params }) => {
   const { id } = await params;
-  const { userMessage, aiResponse } = await req.json();
-  if (!userMessage || !aiResponse) {
-    return NextResponse.json({ error: "userMessage et aiResponse requis" }, { status: 400 });
-  }
-  const message = await addChatMessageServer(id, userMessage, aiResponse);
+  const { userMessage, aiResponse } = await parseJson(req, chatMessageSchema);
+  const message = await chat.addMessage(id, userMessage, aiResponse);
   return NextResponse.json(message, { status: 201 });
-}
+});

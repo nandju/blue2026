@@ -1,11 +1,23 @@
 import { NextResponse } from "next/server";
-import { getStatsServer } from "@/lib/db/stats.server";
+import { courses, registrations, certificates, chat } from "@/lib/data";
 import { requireAdmin } from "@/lib/apiAuth";
+import { apiHandler } from "@/lib/apiHandler";
 
-export async function GET() {
+export const GET = apiHandler(async () => {
   const unauthorized = await requireAdmin();
   if (unauthorized) return unauthorized;
 
-  const stats = await getStatsServer();
-  return NextResponse.json(stats);
-}
+  const [coursesCount, registrationsCount, approved, chatStats] = await Promise.all([
+    courses.count(),
+    registrations.count(),
+    certificates.countByStatus("approved"),
+    chat.stats(),
+  ]);
+  return NextResponse.json({
+    courses: coursesCount,
+    registrations: registrationsCount,
+    certificates: approved,
+    conversations: chatStats.totalUsers,
+    volunteers: 1,
+  });
+});

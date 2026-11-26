@@ -12,8 +12,9 @@ import {
   addQuizResult,
   addCertificateRequest,
 } from "@/lib/store";
+import { QUIZ_DURATION_SECONDS, QUIZ_PASS_THRESHOLD, scoreQuiz } from "@/lib/academyRules";
 
-const QUIZ_DURATION = 20 * 60; // 20 minutes in seconds
+const QUIZ_DURATION = QUIZ_DURATION_SECONDS;
 
 // ─── Certificate Print ─────────────────────────────────────────────────────
 function printCertificate(reg, course, score) {
@@ -70,6 +71,7 @@ function RegistrationForm({ course, onComplete }) {
   const [form, setForm] = useState({ lastName: "", firstName: "", age: "", organization: "", whatsapp: "", email: "" });
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
+  const [submitError, setSubmitError] = useState("");
 
   const validate = () => {
     const e = {};
@@ -86,13 +88,14 @@ function RegistrationForm({ course, onComplete }) {
     const errs = validate();
     if (Object.keys(errs).length) { setErrors(errs); return; }
     setLoading(true);
+    setSubmitError("");
     try {
       await addRegistration({ ...form, courseId: course.id });
       onComplete(form);
-    } catch {
-      // Already registered (or a transient error) — proceed to content anyway,
-      // the registration form already has the learner's info stored locally.
-      onComplete(form);
+    } catch (err) {
+      // Déjà inscrit à cette formation : on reprend simplement le parcours.
+      if (err.status === 409) onComplete(form);
+      else setSubmitError(err.message || "L'inscription n'a pas pu être enregistrée. Réessayez.");
     } finally {
       setLoading(false);
     }
@@ -135,6 +138,9 @@ function RegistrationForm({ course, onComplete }) {
               {errors[key] && <p className="text-red-400 text-xs mt-1">{errors[key]}</p>}
             </div>
           ))}
+          {submitError && (
+            <p className="text-red-500 text-sm bg-red-50 rounded-xl px-4 py-2">{submitError}</p>
+          )}
           <motion.button
             type="submit" disabled={loading}
             whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
@@ -259,15 +265,14 @@ function Quiz({ course, reg, onComplete }) {
   const handleSubmitRef = useRef();
   handleSubmitRef.current = (auto = false) => {
     clearInterval(timerRef.current);
-    const quiz = course.quiz;
-    let correct = 0;
-    quiz.forEach((q, i) => { if (answers[i] === q.answer) correct++; });
-    const score = Math.round((correct / quiz.length) * 100);
-    const passed = score >= 80;
-    const r = { courseId: course.id, email: reg.email, score, correct, total: quiz.length, passed };
-    addQuizResult(r).catch(() => {});
-    setResult(r);
+    // Affichage immédiat, puis remplacement par le résultat calculé et
+    // enregistré par le serveur (seul celui-ci fait foi pour le certificat).
+    const local = { courseId: course.id, email: reg.email, ...scoreQuiz(course.quiz, answers) };
+    setResult(local);
     setSubmitted(true);
+    addQuizResult({ courseId: course.id, email: reg.email, answers })
+      .then((saved) => setResult({ ...local, score: saved.score, correct: saved.correct, total: saved.total, passed: saved.passed }))
+      .catch(() => {});
   };
 
   const mm = String(Math.floor(timeLeft / 60)).padStart(2, "0");
@@ -285,7 +290,7 @@ function Quiz({ course, reg, onComplete }) {
             {result.score}%
           </div>
           <p className="text-gray-500 mb-2">{result.correct} / {result.total} bonnes réponses</p>
-          <p className="text-gray-500 mb-6 text-sm">{result.passed ? "Vous avez atteint le seuil de 80% requis." : "Le seuil requis est de 80%. Vous pouvez retenter le quiz."}</p>
+          <p className="text-gray-500 mb-6 text-sm">{result.passed ? `Vous avez atteint le seuil de ${QUIZ_PASS_THRESHOLD}% requis.` : `Le seuil requis est de ${QUIZ_PASS_THRESHOLD}%. Vous pouvez retenter le quiz.`}</p>
           {result.passed ? (
             <motion.button onClick={() => onComplete(result)}
               whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}
@@ -309,7 +314,7 @@ function Quiz({ course, reg, onComplete }) {
         <div className="flex items-center justify-between mb-8">
           <div>
             <h2 className="text-2xl font-bold text-gray-900">Quiz — {course.title}</h2>
-            <p className="text-gray-500 text-sm mt-1">Répondez à toutes les questions. Score minimum requis : 80%</p>
+            <p className="text-gray-500 text-sm mt-1">Répondez à toutes les questions. Score minimum requis : {QUIZ_PASS_THRESHOLD}%</p>
           </div>
           <div className={`text-2xl font-mono font-bold ${timerColor} bg-[rgba(13,110,187,0.06)] rounded-xl px-4 py-2`}>
             {mm}:{ss}
@@ -352,19 +357,29 @@ function CertificateStage({ course, reg, quizResult }) {
   const [officialRequested, setOfficialRequested] = useState(false);
   const [officialForm, setOfficialForm] = useState(false);
   const [paymentInfo, setPaymentInfo] = useState("");
+  const [sending, setSending] = useState(false);
+  const [requestError, setRequestError] = useState("");
 
   const handleOfficialRequest = async () => {
-    await addCertificateRequest({
-      courseId: course.id,
-      courseTitle: course.title,
-      email: reg.email,
-      firstName: reg.firstName,
-      lastName: reg.lastName,
-      score: quizResult.score,
-      paymentInfo,
-    }).catch(() => {});
-    setOfficialRequested(true);
-    setOfficialForm(false);
+    setSending(true);
+    setRequestError("");
+    try {
+      await addCertificateRequest({
+        courseId: course.id,
+        courseTitle: course.title,
+        email: reg.email,
+        firstName: reg.firstName,
+        lastName: reg.lastName,
+        score: quizResult.score,
+        paymentInfo,
+      });
+      setOfficialRequested(true);
+      setOfficialForm(false);
+    } catch (e) {
+      setRequestError(e.message || "La demande n'a pas pu être envoyée. Réessayez.");
+    } finally {
+      setSending(false);
+    }
   };
 
   return (
@@ -411,10 +426,13 @@ function CertificateStage({ course, reg, quizResult }) {
                     <textarea value={paymentInfo} onChange={(e) => setPaymentInfo(e.target.value)}
                       placeholder="Informations complémentaires (optionnel) : référence de paiement, numéro WhatsApp..."
                       className="w-full border border-[rgba(13,110,187,0.2)] rounded-xl px-4 py-2 text-sm outline-none focus:border-[#0D6EBB] resize-none h-20" />
+                    {requestError && (
+                      <p className="text-red-500 text-sm bg-red-50 rounded-xl px-4 py-2">{requestError}</p>
+                    )}
                     <div className="flex gap-2">
-                      <motion.button onClick={handleOfficialRequest}
-                        whileHover={{ scale: 1.02 }} className="bg-[#0D6EBB] text-white rounded-xl px-5 py-2 text-sm font-semibold hover:bg-[#0DBD9F] transition-colors">
-                        Envoyer la demande
+                      <motion.button onClick={handleOfficialRequest} disabled={sending}
+                        whileHover={{ scale: 1.02 }} className="bg-[#0D6EBB] text-white rounded-xl px-5 py-2 text-sm font-semibold hover:bg-[#0DBD9F] transition-colors disabled:opacity-60">
+                        {sending ? "Envoi en cours..." : "Envoyer la demande"}
                       </motion.button>
                       <button onClick={() => setOfficialForm(false)} className="text-gray-400 text-sm hover:text-gray-600">Annuler</button>
                     </div>

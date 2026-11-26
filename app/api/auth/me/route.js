@@ -1,11 +1,16 @@
 import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
-import { verifySessionToken, SESSION_COOKIE } from "@/lib/session";
+import { getAdminSession } from "@/lib/apiAuth";
+import { dataDriver } from "@/lib/data";
 
 export async function GET() {
-  const cookieStore = await cookies();
-  const token = cookieStore.get(SESSION_COOKIE)?.value;
-  const session = await verifySessionToken(token);
+  const session = await getAdminSession();
   if (!session) return NextResponse.json({ authenticated: false }, { status: 401 });
-  return NextResponse.json({ authenticated: true, email: session.email });
+  return NextResponse.json({
+    authenticated: true,
+    email: session.email,
+    name: session.name,
+    department: session.department,
+    expiresAt: session.expiresAt,
+    dataDriver,
+  });
 }

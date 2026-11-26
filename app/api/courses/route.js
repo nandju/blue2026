@@ -1,20 +1,29 @@
 import { NextResponse } from "next/server";
-import { getCoursesServer, addCourseServer } from "@/lib/db/courses.server";
-import { requireAdmin } from "@/lib/apiAuth";
+import { courses } from "@/lib/data";
+import { requireAdmin, getOperator } from "@/lib/apiAuth";
+import { apiHandler, parseJson } from "@/lib/apiHandler";
+import { courseCreateSchema } from "@/lib/validation";
+import { logAdminAction } from "@/lib/adminLog.server";
+import { ACTIONS, MODULES } from "@/lib/adminLogConstants";
 
-export async function GET() {
-  const courses = await getCoursesServer();
-  return NextResponse.json(courses);
-}
+export const GET = apiHandler(async () => {
+  return NextResponse.json(await courses.list());
+});
 
-export async function POST(req) {
+export const POST = apiHandler(async (req) => {
   const unauthorized = await requireAdmin();
   if (unauthorized) return unauthorized;
 
-  const course = await req.json();
-  if (!course.id || !course.title) {
-    return NextResponse.json({ error: "id et title requis" }, { status: 400 });
-  }
-  const created = await addCourseServer(course);
+  const course = await parseJson(req, courseCreateSchema);
+  const created = await courses.create(course, await getOperator());
+  await logAdminAction({
+    action: ACTIONS.CREATE,
+    module: MODULES.COURSES,
+    target: created.title,
+    changes: [
+      { field: "Sections", from: null, to: created.sections },
+      { field: "Questions du quiz", from: null, to: created.quiz },
+    ],
+  });
   return NextResponse.json(created, { status: 201 });
-}
+});

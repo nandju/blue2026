@@ -1,8 +1,8 @@
-import { getCourseServer } from "@/lib/db/courses.server";
+import { courses } from "@/lib/data";
 
 export async function generateMetadata({ params }) {
   const { courseId } = await params;
-  const course = await getCourseServer(courseId);
+  const course = await courses.get(courseId).catch(() => null);
   if (!course) {
     return {
       title: "Formation introuvable | Blue Academy",

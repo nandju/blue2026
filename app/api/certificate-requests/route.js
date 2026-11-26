@@ -1,21 +1,29 @@
 import { NextResponse } from "next/server";
-import { getCertificateRequestsServer, addCertificateRequestServer } from "@/lib/db/academy.server";
+import { certificates, quizResults, courses, ForbiddenError } from "@/lib/data";
 import { requireAdmin } from "@/lib/apiAuth";
+import { apiHandler, parseJson } from "@/lib/apiHandler";
+import { certificateRequestSchema } from "@/lib/validation";
 
-export async function GET() {
+export const GET = apiHandler(async () => {
   const unauthorized = await requireAdmin();
   if (unauthorized) return unauthorized;
+  return NextResponse.json(await certificates.list());
+});
 
-  const requests = await getCertificateRequestsServer();
-  return NextResponse.json(requests);
-}
-
-export async function POST(req) {
-  const body = await req.json();
-  const { courseId, courseTitle, email, firstName, lastName, score } = body;
-  if (!courseId || !courseTitle || !email || !firstName || !lastName || score == null) {
-    return NextResponse.json({ error: "Champs requis manquants" }, { status: 400 });
+// Une demande de certificat officiel n'est acceptée que si un quiz réussi
+// est enregistré pour cet email et cette formation ; le score et le titre
+// proviennent du serveur.
+export const POST = apiHandler(async (req) => {
+  const body = await parseJson(req, certificateRequestSchema);
+  const passed = await quizResults.getLatestPassed(body.courseId, body.email);
+  if (!passed) {
+    throw new ForbiddenError("Aucun quiz réussi n'est enregistré pour cet email et cette formation.");
   }
-  const created = await addCertificateRequestServer(body);
+  const course = await courses.get(body.courseId);
+  const created = await certificates.add({
+    ...body,
+    courseTitle: course?.title || body.courseTitle || body.courseId,
+    score: passed.score,
+  });
   return NextResponse.json(created, { status: 201 });
-}
+});

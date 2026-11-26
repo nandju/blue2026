@@ -16,7 +16,8 @@
     "lint": "next lint",
     "postbuild": "next-sitemap",
     "generate-sitemap": "next-sitemap",
-    "seed:admin": "node --env-file=.env.local scripts/seed-admin.mjs"
+    "seed:admin": "node --env-file=.env.local scripts/seed-admin.mjs",
+    "hash:password": "node scripts/hash-password.mjs"
   },
   "dependencies": {
     "@ai-sdk/google": "^3.0.80",
@@ -47,7 +48,8 @@
     "sharp": "^0.33.5",
     "sitemap": "^8.0.1",
     "swr": "^2.3.3",
-    "tailwindcss": "^4.0.14"
+    "tailwindcss": "^4.0.14",
+    "zod": "4.6.7"
   },
   "devDependencies": {
     "@next/bundle-analyzer": "15.2.9",

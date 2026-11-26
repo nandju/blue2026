@@ -13,6 +13,7 @@ export async function middleware(req) {
   return NextResponse.next();
 }
 
+// Protège toutes les pages sous /admin/… ; la page de connexion /admin reste publique.
 export const config = {
-  matcher: ["/admin/dashboard/:path*", "/admin/chatbot/:path*"],
+  matcher: ["/admin/:path+"],
 };

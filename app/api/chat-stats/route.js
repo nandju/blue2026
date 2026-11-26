@@ -1,11 +1,10 @@
 import { NextResponse } from "next/server";
-import { getChatStatsServer } from "@/lib/db/chat.server";
+import { chat } from "@/lib/data";
 import { requireAdmin } from "@/lib/apiAuth";
+import { apiHandler } from "@/lib/apiHandler";
 
-export async function GET() {
+export const GET = apiHandler(async () => {
   const unauthorized = await requireAdmin();
   if (unauthorized) return unauthorized;
-
-  const stats = await getChatStatsServer();
-  return NextResponse.json(stats);
-}
+  return NextResponse.json(await chat.stats());
+});
