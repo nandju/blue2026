@@ -17,7 +17,7 @@ export default function PageHero({ image, eyebrow, title, description, children 
 					className="object-cover"
 					{...(typeof image === "string" ? {} : { placeholder: "blur" })}
 				/>
-				<div className="absolute inset-0 bg-gradient-to-b from-[#062E52]/70 via-[#0D6EBB]/45 to-[#062E52]/85" />
+				<div className="absolute inset-0 bg-gradient-to-b from-[var(--color-navy)]/70 via-[var(--color-primary)]/45 to-[var(--color-navy)]/85" />
 			</div>
 
 			{/* Content */}
@@ -27,7 +27,7 @@ export default function PageHero({ image, eyebrow, title, description, children 
 					animate={{ opacity: 1, y: 0 }}
 					transition={{ duration: 0.7, ease: "easeOut" }}>
 					{eyebrow && (
-						<span className="inline-block text-[#0DBD9F] text-xs md:text-sm font-bold uppercase tracking-[0.3em] mb-4">
+						<span className="inline-block text-[var(--color-secondary)] text-xs md:text-sm font-bold uppercase tracking-[0.3em] mb-4">
 							{eyebrow}
 						</span>
 					)}
@@ -49,8 +49,8 @@ export default function PageHero({ image, eyebrow, title, description, children 
 export function HeroButton({ href, children, variant = "primary", external = false }) {
 	const cls =
 		variant === "primary"
-			? "bg-[#0DBD9F] text-white hover:bg-white hover:text-[#0D6EBB]"
-			: "border-2 border-white/70 text-white hover:bg-white hover:text-[#0D6EBB]";
+			? "bg-[var(--color-secondary)] text-white hover:bg-white hover:text-[var(--color-primary)]"
+			: "border-2 border-white/70 text-white hover:bg-white hover:text-[var(--color-primary)]";
 	const inner = (
 		<span className={`inline-block rounded-full px-7 py-3 text-sm font-semibold transition-all duration-300 shadow-lg ${cls}`}>
 			{children}

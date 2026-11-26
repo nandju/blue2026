@@ -60,7 +60,7 @@ export default function VolunteerOfMonthPopup() {
               exit={{ scale: 0.85, opacity: 0, y: 40 }}
               transition={{ type: "spring", stiffness: 300, damping: 28 }}>
               {/* Header gradient */}
-              <div className="bg-gradient-to-br from-[#0D6EBB] to-[#0DBD9F] px-8 pt-8 pb-16 text-center relative">
+              <div className="bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-secondary)] px-8 pt-8 pb-16 text-center relative">
                 <button
                   onClick={handleClose}
                   className="absolute top-4 right-4 text-white/70 hover:text-white transition-colors text-xl">
@@ -82,7 +82,7 @@ export default function VolunteerOfMonthPopup() {
 
               {/* Avatar */}
               <div className="flex justify-center -mt-12 mb-4 relative z-10">
-                <div className="w-24 h-24 rounded-full border-4 border-white shadow-lg bg-gradient-to-br from-[#0D6EBB] to-[#0DBD9F] flex items-center justify-center">
+                <div className="w-24 h-24 rounded-full border-4 border-white shadow-lg bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-secondary)] flex items-center justify-center">
                   {volunteer.photo ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={volunteer.photo} alt={volunteer.firstName} className="w-full h-full rounded-full object-cover" />
@@ -96,17 +96,17 @@ export default function VolunteerOfMonthPopup() {
 
               {/* Content */}
               <div className="px-8 pb-8 space-y-4">
-                <div className="bg-[rgba(13,110,187,0.06)] rounded-2xl p-4">
-                  <h4 className="text-[#0D6EBB] font-semibold text-sm mb-1">Actions réalisées</h4>
+                <div className="bg-[rgb(var(--color-primary-rgb)/0.06)] rounded-2xl p-4">
+                  <h4 className="text-[var(--color-primary)] font-semibold text-sm mb-1">Actions réalisées</h4>
                   <p className="text-gray-600 text-sm leading-relaxed">{volunteer.actions}</p>
                 </div>
-                <div className="bg-[rgba(13,189,159,0.08)] rounded-2xl p-4">
-                  <h4 className="text-[#0DBD9F] font-semibold text-sm mb-1">Contribution environnementale</h4>
+                <div className="bg-[rgb(var(--color-secondary-rgb)/0.08)] rounded-2xl p-4">
+                  <h4 className="text-[var(--color-secondary)] font-semibold text-sm mb-1">Contribution environnementale</h4>
                   <p className="text-gray-600 text-sm leading-relaxed">{volunteer.contribution}</p>
                 </div>
                 <button
                   onClick={handleClose}
-                  className="w-full bg-[#0D6EBB] hover:bg-[#0DBD9F] text-white rounded-2xl py-3 font-semibold transition-colors duration-300">
+                  className="w-full bg-[var(--color-primary)] hover:bg-[var(--color-secondary)] text-white rounded-2xl py-3 font-semibold transition-colors duration-300">
                   Continuer sur BLUE
                 </button>
               </div>
@@ -123,7 +123,7 @@ export default function VolunteerOfMonthPopup() {
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: -48, opacity: 0 }}
             transition={{ type: "spring", stiffness: 300, damping: 30 }}
-            className="fixed top-0 left-0 right-0 z-[60] bg-gradient-to-r from-[#0D6EBB] to-[#0DBD9F] h-12 flex items-center justify-between px-4 md:px-8 shadow-md">
+            className="fixed top-0 left-0 right-0 z-[60] bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-secondary)] h-12 flex items-center justify-between px-4 md:px-8 shadow-md">
             <p className="text-white text-xs md:text-sm font-medium truncate">
               🌟 Découvrez notre Bénévole du Mois : <strong>{volunteer.firstName} {volunteer.lastName}</strong>
             </p>

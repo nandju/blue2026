@@ -18,7 +18,7 @@ export default function NotFound() {
 					priority
 				/>
 			</div>
-			<h1 className="mt-6 text-3xl md:text-5xl font-bold text-[#073A63]">
+			<h1 className="mt-6 text-3xl md:text-5xl font-bold text-[var(--color-dark)]">
 				Page introuvable
 			</h1>
 			<p className="mt-4 text-gray-600 max-w-md">
@@ -28,12 +28,12 @@ export default function NotFound() {
 			<div className="mt-8 flex flex-wrap justify-center gap-4">
 				<Link
 					href="/"
-					className="rounded-full bg-[#0D6EBB] px-8 py-3 text-sm font-semibold text-white shadow-lg hover:bg-[#0DBD9F] transition-colors">
+					className="rounded-full bg-[var(--color-primary)] px-8 py-3 text-sm font-semibold text-white shadow-lg hover:bg-[var(--color-secondary)] transition-colors">
 					Retour à l&apos;accueil
 				</Link>
 				<button
 					onClick={() => window.history.back()}
-					className="rounded-full border-2 border-[#0D6EBB] px-8 py-3 text-sm font-semibold text-[#0D6EBB] hover:bg-[#0D6EBB] hover:text-white transition-colors">
+					className="rounded-full border-2 border-[var(--color-primary)] px-8 py-3 text-sm font-semibold text-[var(--color-primary)] hover:bg-[var(--color-primary)] hover:text-white transition-colors">
 					Page précédente
 				</button>
 			</div>

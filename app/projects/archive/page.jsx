@@ -1,34 +1,39 @@
 "use client";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 
 import PageHero from "@/components/PageHero";
-import Projects from "@/json/data.json";
-import HeroImg from "@/public/ong_blue/images/illustrations/page-landing/marine-research-ocean-pollution-study.jpg";
+import { getProjects } from "@/lib/store";
+import { useContent } from "@/components/SiteContentProvider";
 
 export default function ArchivePage() {
-	const projects = Projects.Projects;
+	const arch = useContent("projectsPage.archive") || {};
+	const hero = arch.hero || {};
+	const [projects, setProjects] = useState([]);
 
 	useEffect(() => {
 		window.scrollTo(0, 0);
+		getProjects()
+			.then(setProjects)
+			.catch(() => setProjects([]));
 	}, []);
 
 	return (
 		<main className="overflow-x-hidden">
 			<PageHero
-				image={HeroImg}
-				eyebrow="Archives"
-				title="L'historique de nos actions"
-				description="Retrouvez l'ensemble des projets et programmes menés par BLUE depuis sa création en 2022."
+				image={hero.image}
+				eyebrow={hero.eyebrow}
+				title={hero.title}
+				description={hero.description}
 			/>
 
 			<section className="py-16 md:py-24 bg-white">
 				<div className="mx-auto max-w-5xl px-6 md:px-8">
-					<div className="overflow-x-auto rounded-2xl border border-[#0D6EBB]/10 shadow-sm">
+					<div className="overflow-x-auto rounded-2xl border border-[var(--color-primary)]/10 shadow-sm">
 						<table className="w-full text-left text-sm">
 							<thead>
-								<tr className="bg-[#0D6EBB] text-white">
+								<tr className="bg-[var(--color-primary)] text-white">
 									<th className="py-4 px-5 font-semibold">Année</th>
 									<th className="py-4 px-5 font-semibold">Projet</th>
 									<th className="py-4 px-5 font-semibold hidden md:table-cell">Domaines</th>
@@ -39,24 +44,24 @@ export default function ArchivePage() {
 								{projects.map((project, index) => (
 									<motion.tr
 										key={project.slug}
-										className="border-t border-[#0D6EBB]/8 hover:bg-[#f4f9fd] transition-colors"
+										className="border-t border-[var(--color-primary)]/8 hover:bg-[#f4f9fd] transition-colors"
 										initial={{ opacity: 0, y: 10 }}
 										whileInView={{ opacity: 1, y: 0 }}
 										viewport={{ once: true }}
 										transition={{ delay: index * 0.04 }}>
-										<td className="py-4 px-5 text-[#0DBD9F] font-semibold whitespace-nowrap">
+										<td className="py-4 px-5 text-[var(--color-secondary)] font-semibold whitespace-nowrap">
 											{project.year}
 										</td>
-										<td className="py-4 px-5 font-medium text-[#073A63]">
+										<td className="py-4 px-5 font-medium text-[var(--color-dark)]">
 											{project.title}
 										</td>
 										<td className="py-4 px-5 text-gray-500 hidden md:table-cell">
-											{project.tech.join(", ")}
+											{(project.tech || []).join(", ")}
 										</td>
 										<td className="py-4 px-5">
 											<Link
 												href={`/projects/${project.slug}`}
-												className="text-[#0D6EBB] font-semibold hover:text-[#0DBD9F] transition-colors whitespace-nowrap">
+												className="text-[var(--color-primary)] font-semibold hover:text-[var(--color-secondary)] transition-colors whitespace-nowrap">
 												Voir →
 											</Link>
 										</td>
@@ -65,13 +70,15 @@ export default function ArchivePage() {
 							</tbody>
 						</table>
 					</div>
-					<div className="mt-10 text-center">
-						<Link
-							href="/projects"
-							className="inline-block rounded-full bg-[#0D6EBB] px-8 py-3 text-sm font-semibold text-white hover:bg-[#0DBD9F] transition-colors">
-							← Retour aux projets
-						</Link>
-					</div>
+					{arch.backCta && (
+						<div className="mt-10 text-center">
+							<Link
+								href="/projects"
+								className="inline-block rounded-full bg-[var(--color-primary)] px-8 py-3 text-sm font-semibold text-white hover:bg-[var(--color-secondary)] transition-colors">
+								{arch.backCta}
+							</Link>
+						</div>
+					)}
 				</div>
 			</section>
 		</main>

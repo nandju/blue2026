@@ -1,21 +1,10 @@
 "use client";
 import { useEffect, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import Link from "next/link";
-import Image from "next/image";
 import { usePathname } from "next/navigation";
 
-import Logo from "@/public/ong_blue/images/logo.png";
-
-const NAV_LINKS = [
-	{ href: "/", label: "Accueil" },
-	{ href: "/about", label: "À Propos" },
-	{ href: "/projects", label: "Nos Actions" },
-	{ href: "/academy", label: "Blue Academy" },
-	{ href: "/benevolat", label: "Bénévolat" },
-	{ href: "/partenaires", label: "Partenaires" },
-	{ href: "/contact", label: "Contact" },
-];
+import { useContent, useSiteSettings } from "@/components/SiteContentProvider";
 
 const overlayVariants = {
 	open: {
@@ -50,6 +39,9 @@ export default function Navbar() {
 	const pathname = usePathname();
 	const [isOpen, setIsOpen] = useState(false);
 	const [scrolled, setScrolled] = useState(false);
+	const nav = useContent("shared.navbar") || {};
+	const identity = useSiteSettings().identity || {};
+	const links = nav.links || [];
 
 	useEffect(() => {
 		const onScroll = () => setScrolled(window.scrollY > 40);
@@ -83,44 +75,49 @@ export default function Navbar() {
 							: "bg-gradient-to-b from-black/40 to-transparent"
 				}`}>
 				<div className="mx-auto max-w-7xl px-5 md:px-8 h-16 md:h-20 flex items-center justify-between">
-					<Link href="/" className="flex items-center gap-3 shrink-0" aria-label="BLUE — Accueil">
+					<Link href="/" className="flex items-center gap-3 shrink-0" aria-label={`${identity.name || "BLUE"} — Accueil`}>
 						<span className="relative w-9 h-9 md:w-10 md:h-10 rounded-full overflow-hidden bg-white/90 flex items-center justify-center shadow">
-							<Image src={Logo} alt="Logo BLUE" fill sizes="40px" className="object-contain p-0.5" />
+							{identity.logo && (
+								// eslint-disable-next-line @next/next/no-img-element
+								<img src={identity.logo} alt={`Logo ${identity.name || "BLUE"}`} className="w-full h-full object-contain p-0.5" />
+							)}
 						</span>
 						<span
 							className={`text-xl md:text-2xl font-extrabold tracking-[0.18em] transition-colors duration-500 ${
-								solid && !isOpen ? "text-[#0D6EBB]" : "text-white"
+								solid && !isOpen ? "text-[var(--color-primary)]" : "text-white"
 							}`}>
-							BLUE
+							{identity.name || "BLUE"}
 						</span>
 					</Link>
 
 					{/* Desktop nav */}
 					<nav className="hidden lg:flex items-center gap-7">
-						{NAV_LINKS.map((link) => (
+						{links.map((link) => (
 							<Link
 								key={link.href}
 								href={link.href}
 								className={`relative text-sm font-medium tracking-wide transition-colors duration-300 group ${
-									solid ? "text-[#0a4a7c] hover:text-[#0DBD9F]" : "text-white/90 hover:text-white"
-								} ${isActive(link.href) ? (solid ? "text-[#0D6EBB]" : "text-white") : ""}`}>
+									solid ? "text-[var(--color-primary)] hover:text-[var(--color-secondary)]" : "text-white/90 hover:text-white"
+								} ${isActive(link.href) ? (solid ? "text-[var(--color-primary)]" : "text-white") : ""}`}>
 								{link.label}
 								<span
-									className={`absolute -bottom-1.5 left-0 h-[2px] rounded-full bg-[#0DBD9F] transition-all duration-300 ${
+									className={`absolute -bottom-1.5 left-0 h-[2px] rounded-full bg-[var(--color-secondary)] transition-all duration-300 ${
 										isActive(link.href) ? "w-full" : "w-0 group-hover:w-full"
 									}`}
 								/>
 							</Link>
 						))}
-						<Link
-							href="/benevolat"
-							className={`ml-2 rounded-full px-5 py-2.5 text-sm font-semibold transition-all duration-300 shadow-md ${
-								solid
-									? "bg-[#0D6EBB] text-white hover:bg-[#0DBD9F]"
-									: "bg-white text-[#0D6EBB] hover:bg-[#0DBD9F] hover:text-white"
-							}`}>
-							Nous rejoindre
-						</Link>
+						{nav.cta?.href && (
+							<Link
+								href={nav.cta.href}
+								className={`ml-2 rounded-full px-5 py-2.5 text-sm font-semibold transition-all duration-300 shadow-md ${
+									solid
+										? "bg-[var(--color-primary)] text-white hover:bg-[var(--color-secondary)]"
+										: "bg-white text-[var(--color-primary)] hover:bg-[var(--color-secondary)] hover:text-white"
+								}`}>
+								{nav.cta.label}
+							</Link>
+						)}
 					</nav>
 
 					{/* Mobile burger */}
@@ -131,12 +128,12 @@ export default function Navbar() {
 						onClick={() => setIsOpen((o) => !o)}>
 						<span
 							className={`w-8 h-[3px] rounded-full transition-all duration-300 ${
-								isOpen ? "rotate-45 translate-y-[4.5px] bg-white" : solid ? "bg-[#0D6EBB]" : "bg-white"
+								isOpen ? "rotate-45 translate-y-[4.5px] bg-white" : solid ? "bg-[var(--color-primary)]" : "bg-white"
 							}`}
 						/>
 						<span
 							className={`w-8 h-[3px] rounded-full transition-all duration-300 ${
-								isOpen ? "-rotate-45 -translate-y-[4.5px] bg-white" : solid ? "bg-[#0D6EBB]" : "bg-white"
+								isOpen ? "-rotate-45 -translate-y-[4.5px] bg-white" : solid ? "bg-[var(--color-primary)]" : "bg-white"
 							}`}
 						/>
 					</button>
@@ -150,9 +147,9 @@ export default function Navbar() {
 				animate={isOpen ? "open" : "closed"}
 				initial={false}
 				aria-hidden={!isOpen}>
-				<div className="w-full h-full bg-gradient-to-br from-[#073A63] via-[#0D6EBB] to-[#0a5a9a] flex flex-col items-center justify-center">
+				<div className="w-full h-full bg-gradient-to-br from-[var(--color-dark)] via-[var(--color-primary)] to-[var(--color-primary-dark)] flex flex-col items-center justify-center">
 					<nav className="flex flex-col items-center gap-5">
-						{NAV_LINKS.map((link, i) => (
+						{links.map((link, i) => (
 							<motion.div
 								key={link.href}
 								variants={itemVariants}
@@ -162,23 +159,25 @@ export default function Navbar() {
 									href={link.href}
 									onClick={() => setIsOpen(false)}
 									className={`text-2xl font-bold transition-colors ${
-										isActive(link.href) ? "text-[#0DBD9F]" : "text-white hover:text-[#0DBD9F]"
+										isActive(link.href) ? "text-[var(--color-secondary)]" : "text-white hover:text-[var(--color-secondary)]"
 									}`}>
 									{link.label}
 								</Link>
 							</motion.div>
 						))}
-						<motion.div
-							variants={itemVariants}
-							animate={isOpen ? "open" : "closed"}
-							custom={0.1 + NAV_LINKS.length * 0.06}>
-							<Link
-								href="/benevolat"
-								onClick={() => setIsOpen(false)}
-								className="mt-3 inline-block bg-[#0DBD9F] text-white rounded-full px-8 py-3 font-semibold shadow-lg">
-								Nous rejoindre
-							</Link>
-						</motion.div>
+						{nav.cta?.href && (
+							<motion.div
+								variants={itemVariants}
+								animate={isOpen ? "open" : "closed"}
+								custom={0.1 + links.length * 0.06}>
+								<Link
+									href={nav.cta.href}
+									onClick={() => setIsOpen(false)}
+									className="mt-3 inline-block bg-[var(--color-secondary)] text-white rounded-full px-8 py-3 font-semibold shadow-lg">
+									{nav.cta.label}
+								</Link>
+							</motion.div>
+						)}
 					</nav>
 				</div>
 			</motion.div>

@@ -5,7 +5,7 @@ import PropTypes from "prop-types";
 import BlurImage from "@/public/image/placeholder/blur.jpg";
 
 export default function ProjectCard({ project, index, activeCategory }) {
-	if (!project.category.includes(Number(activeCategory))) return null;
+	if (!project.category?.includes(Number(activeCategory))) return null;
 
 	return (
 		<motion.div
@@ -15,38 +15,40 @@ export default function ProjectCard({ project, index, activeCategory }) {
 			transition={{ delay: (index % 3) * 0.08, duration: 0.5 }}>
 			<Link
 				href={`/projects/${project.slug}`}
-				className="group block h-full rounded-3xl overflow-hidden bg-white border border-[#0D6EBB]/10 shadow-sm hover:shadow-2xl transition-all duration-300">
+				className="group block h-full rounded-3xl overflow-hidden bg-white border border-[var(--color-primary)]/10 shadow-sm hover:shadow-2xl transition-all duration-300">
 				<div className="relative aspect-[16/10] overflow-hidden">
-					<Image
-						src={project.thumbnail}
-						alt={project.title}
-						fill
-						sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-						className="object-cover group-hover:scale-105 transition-transform duration-700"
-						placeholder="blur"
-						blurDataURL={BlurImage.src}
-					/>
-					<div className="absolute inset-0 bg-gradient-to-t from-[#062E52]/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-					<span className="absolute top-4 left-4 bg-white/90 text-[#0D6EBB] text-xs font-bold px-3 py-1 rounded-full">
+					{project.thumbnail && (
+						<Image
+							src={project.thumbnail}
+							alt={project.title}
+							fill
+							sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+							className="object-cover group-hover:scale-105 transition-transform duration-700"
+							placeholder="blur"
+							blurDataURL={BlurImage.src}
+						/>
+					)}
+					<div className="absolute inset-0 bg-gradient-to-t from-[var(--color-navy)]/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+					<span className="absolute top-4 left-4 bg-white/90 text-[var(--color-primary)] text-xs font-bold px-3 py-1 rounded-full">
 						{project.year}
 					</span>
 				</div>
 				<div className="p-6">
-					<h3 className="text-lg font-bold text-[#073A63] group-hover:text-[#0D6EBB] transition-colors leading-snug">
+					<h3 className="text-lg font-bold text-[var(--color-dark)] group-hover:text-[var(--color-primary)] transition-colors leading-snug">
 						{project.title}
 					</h3>
 					<p className="mt-2 text-sm text-gray-600 leading-relaxed line-clamp-2">
-						{project.desc[0]}
+						{project.desc?.[0]}
 					</p>
 					<div className="mt-4 flex items-center justify-between">
 						<div className="flex flex-wrap gap-1.5">
-							{project.tech.slice(0, 2).map((t) => (
-								<span key={t} className="text-xs px-2.5 py-1 rounded-full bg-[#0D6EBB]/8 text-[#0D6EBB]">
+							{(project.tech || []).slice(0, 2).map((t) => (
+								<span key={t} className="text-xs px-2.5 py-1 rounded-full bg-[var(--color-primary)]/8 text-[var(--color-primary)]">
 									{t}
 								</span>
 							))}
 						</div>
-						<span className="text-[#0DBD9F] text-sm font-semibold opacity-0 group-hover:opacity-100 transition-opacity">
+						<span className="text-[var(--color-secondary)] text-sm font-semibold opacity-0 group-hover:opacity-100 transition-opacity">
 							Voir →
 						</span>
 					</div>

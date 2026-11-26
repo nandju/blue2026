@@ -1,99 +1,101 @@
 import "./globals.css";
-import { Outfit } from "next/font/google";
 import { config } from "@fortawesome/fontawesome-svg-core";
 import "@fortawesome/fontawesome-svg-core/styles.css";
 config.autoAddCss = false;
 import { Analytics } from "@vercel/analytics/react";
 import ClientTopProgressBar from "@/components/ClientTopProgressBar";
 import ClientLayoutWrapper from "@/components/ClientLayoutWrapper";
+import { SiteContentProvider } from "@/components/SiteContentProvider";
+import { getSiteData } from "@/lib/content/siteData.server";
+import { googleFontsUrl, fontById, normalizeFonts } from "@/lib/content/fonts";
+import { paletteFrom } from "@/lib/colors";
 
-const outfit = Outfit({
-	subsets: ["latin"],
-	weight: ["300", "400", "500", "600", "700", "800"],
-	display: "swap",
-	variable: "--font-outfit",
-});
+const SITE_URL = "https://www.bluemakers.net";
 
-export const metadata = {
-	metadataBase: new URL("https://www.bluemakers.net"),
-	title: "BLUE | Ensemble Contre la Pollution Plastique",
+export async function generateMetadata() {
+  const { content, settings } = await getSiteData();
+  const seo = content.shared.seo;
+  const identity = settings.identity;
+  return {
+    metadataBase: new URL(SITE_URL),
+    title: seo.title,
+    description: seo.description,
+    applicationName: identity.name,
+    keywords: seo.keywords,
+    icons: identity.favicon ? { icon: identity.favicon } : undefined,
+    openGraph: {
+      type: "website",
+      url: SITE_URL,
+      title: seo.ogTitle || seo.title,
+      siteName: identity.name,
+      description: seo.ogDescription || seo.description,
+      images: seo.ogImage
+        ? [{ url: seo.ogImage, alt: `${identity.name} - Organisation Non Gouvernementale`, width: 1200, height: 630 }]
+        : undefined,
+    },
+  };
+}
 
-	description:
-		"BLUE est une ONG ivoirienne dédiée à la lutte contre la pollution plastique. Nous mobilisons citoyens, entreprises et communautés pour protéger l'environnement et construire un avenir durable.",
+export default async function RootLayout({ children }) {
+  const { content, settings } = await getSiteData();
+  const p = paletteFrom(settings.colors);
+  const fonts = normalizeFonts(settings.fonts);
+  const { identity, contact, socials } = settings;
 
-	author: "BLUE - Organisation Non Gouvernementale",
-	siteUrl: "https://www.bluemakers.net",
-	applicationName: "BLUE",
+  const cssVars = {
+    "--color-primary": p.primary,
+    "--color-primary-rgb": p.rgb.primary,
+    "--color-secondary": p.secondary,
+    "--color-secondary-rgb": p.rgb.secondary,
+    "--color-dark": p.dark,
+    "--color-dark-rgb": p.rgb.dark,
+    "--color-navy": p.navy,
+    "--color-navy-rgb": p.rgb.navy,
+    "--color-primary-dark": p.primaryDark,
+    "--color-primary-dark-rgb": p.rgb.primaryDark,
+    "--font-heading": fontById(fonts.heading).stack,
+    "--font-body": fontById(fonts.body).stack,
+  };
 
-	keywords: [
-		"BLUE",
-		"BLUE Makers",
-		"ONG Côte d'Ivoire",
-		"pollution plastique",
-		"environnement",
-		"recyclage",
-		"développement durable",
-		"Abidjan",
-		"protection océans",
-		"reforestation",
-	],
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: identity.name,
+    url: SITE_URL,
+    logo: identity.logo ? new URL(identity.logo, SITE_URL).toString() : undefined,
+    description:
+      content.shared.seo.description ||
+      "Organisation non gouvernementale dédiée à la lutte contre la pollution plastique en Côte d'Ivoire",
+    foundingDate: "2022-01",
+    address: {
+      "@type": "PostalAddress",
+      addressLocality: contact.address || "Abidjan",
+      addressCountry: "CI",
+    },
+    contactPoint:
+      contact.phones?.[0] || contact.email
+        ? {
+            "@type": "ContactPoint",
+            telephone: contact.phones?.[0] || undefined,
+            email: contact.email || undefined,
+            contactType: "Customer Service",
+          }
+        : undefined,
+    sameAs: Object.values(socials || {}).filter((v) => typeof v === "string" && v.startsWith("http")),
+  };
 
-	openGraph: {
-		type: "website",
-		url: "https://www.bluemakers.net",
-		title: "BLUE | Ensemble Contre la Pollution Plastique",
-		siteName: "BLUE",
-		description: "ONG ivoirienne dédiée à la lutte contre la pollution plastique et la protection de l'environnement.",
-		images: [
-			{
-				url: "/og-image-rev.png",
-				alt: "BLUE - Organisation Non Gouvernementale",
-				width: 1200,
-				height: 630,
-			},
-		],
-	},
-};
-
-const jsonLd = {
-	"@context": "https://schema.org",
-	"@type": "Organization",
-	name: "BLUE",
-	url: "https://www.bluemakers.net",
-	description: "Organisation non gouvernementale dédiée à la lutte contre la pollution plastique en Côte d'Ivoire",
-	foundingDate: "2022-01",
-	address: {
-		"@type": "PostalAddress",
-		addressLocality: "Abidjan",
-		addressCountry: "CI",
-	},
-	contactPoint: {
-		"@type": "ContactPoint",
-		telephone: "+225-0778060961",
-		email: "blue@bluemakers.net",
-		contactType: "Customer Service",
-	},
-	sameAs: [
-		"https://www.facebook.com/bluemakers",
-		"https://www.linkedin.com/company/bluemakers",
-		"https://www.instagram.com/bluemakers",
-	],
-};
-
-export default function RootLayout({ children }) {
-	return (
-		<html lang="fr" className={`${outfit.variable}`}>
-			<body>
-				<script
-					type="application/ld+json"
-					dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-				/>
-				<ClientTopProgressBar />
-				<ClientLayoutWrapper>
-					{children}
-				</ClientLayoutWrapper>
-				<Analytics />
-			</body>
-		</html>
-	);
+  return (
+    <html lang="fr" style={cssVars}>
+      <body>
+        {/* Polices choisies dans /admin/webmaster (2 familles maximum chargées) */}
+        <link rel="stylesheet" href={googleFontsUrl(fonts)} precedence="fonts" />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+        <SiteContentProvider value={{ content, settings }}>
+          <ClientTopProgressBar />
+          <ClientLayoutWrapper>{children}</ClientLayoutWrapper>
+        </SiteContentProvider>
+        <Analytics />
+      </body>
+    </html>
+  );
 }

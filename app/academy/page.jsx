@@ -13,9 +13,9 @@ const CATEGORIES = ["Tous", "environnement", "formation"];
 const LEVELS = ["Tous niveaux", "Débutant", "Intermédiaire", "Avancé"];
 
 const levelColor = {
-  Débutant: "bg-[rgba(13,189,159,0.12)] text-[#0DBD9F]",
-  Intermédiaire: "bg-[rgba(13,110,187,0.12)] text-[#0D6EBB]",
-  Avancé: "bg-[rgba(13,110,187,0.18)] text-[#0a5a9a]",
+  Débutant: "bg-[rgb(var(--color-secondary-rgb)/0.12)] text-[var(--color-secondary)]",
+  Intermédiaire: "bg-[rgb(var(--color-primary-rgb)/0.12)] text-[var(--color-primary)]",
+  Avancé: "bg-[rgb(var(--color-primary-rgb)/0.18)] text-[var(--color-primary-dark)]",
 };
 
 const categoryLabel = { environnement: "Environnement", formation: "Formation" };
@@ -63,11 +63,11 @@ export default function AcademyPage() {
       />
 
       {/* Perks */}
-      <section className="bg-[#062E52] py-8">
+      <section className="bg-[var(--color-navy)] py-8">
         <div className="mx-auto max-w-5xl px-6 flex flex-col md:flex-row items-center justify-center gap-4 md:gap-10">
           {PERKS.map((p) => (
             <p key={p} className="flex items-center gap-2.5 text-white/85 text-sm text-center md:text-left">
-              <span className="w-5 h-5 rounded-full bg-[#0DBD9F]/30 text-[#0DBD9F] flex items-center justify-center text-[10px] shrink-0">✓</span>
+              <span className="w-5 h-5 rounded-full bg-[var(--color-secondary)]/30 text-[var(--color-secondary)] flex items-center justify-center text-[10px] shrink-0">✓</span>
               {p}
             </p>
           ))}
@@ -85,7 +85,7 @@ export default function AcademyPage() {
 
           {/* Search & Filters */}
           <motion.div
-            className="mt-10 bg-white rounded-2xl shadow-lg p-5 border border-[rgba(13,110,187,0.1)]"
+            className="mt-10 bg-white rounded-2xl shadow-lg p-5 border border-[rgb(var(--color-primary-rgb)/0.1)]"
             initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
             <div className="flex flex-col md:flex-row gap-4">
               <div className="flex-1 relative">
@@ -96,14 +96,14 @@ export default function AcademyPage() {
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   placeholder="Rechercher une formation..."
-                  className="w-full pl-11 pr-4 py-3 rounded-xl border border-[rgba(13,110,187,0.15)] focus:border-[#0D6EBB] outline-none text-sm transition-colors"
+                  className="w-full pl-11 pr-4 py-3 rounded-xl border border-[rgb(var(--color-primary-rgb)/0.15)] focus:border-[var(--color-primary)] outline-none text-sm transition-colors"
                 />
               </div>
               <div className="flex gap-2 flex-wrap">
                 {CATEGORIES.map((cat) => (
                   <button key={cat} onClick={() => setCategory(cat)}
                     className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors ${
-                      category === cat ? "bg-[#0D6EBB] text-white" : "bg-[rgba(13,110,187,0.08)] text-[#0D6EBB] hover:bg-[rgba(13,110,187,0.15)]"
+                      category === cat ? "bg-[var(--color-primary)] text-white" : "bg-[rgb(var(--color-primary-rgb)/0.08)] text-[var(--color-primary)] hover:bg-[rgb(var(--color-primary-rgb)/0.15)]"
                     }`}>
                     {cat === "Tous" ? "Tous" : categoryLabel[cat] || cat}
                   </button>
@@ -112,7 +112,7 @@ export default function AcademyPage() {
               <select
                 value={level}
                 onChange={(e) => setLevel(e.target.value)}
-                className="px-4 py-2 rounded-xl border border-[rgba(13,110,187,0.15)] text-sm text-gray-700 focus:border-[#0D6EBB] outline-none bg-white">
+                className="px-4 py-2 rounded-xl border border-[rgb(var(--color-primary-rgb)/0.15)] text-sm text-gray-700 focus:border-[var(--color-primary)] outline-none bg-white">
                 {LEVELS.map((l) => <option key={l}>{l}</option>)}
               </select>
             </div>
@@ -127,19 +127,19 @@ export default function AcademyPage() {
                 <p className="text-sm text-gray-400 mt-2">Vérifiez votre connexion puis réessayez.</p>
                 <button
                   onClick={loadCourses}
-                  className="mt-6 rounded-full bg-[#0D6EBB] px-7 py-2.5 text-sm font-semibold text-white hover:bg-[#0DBD9F] transition-colors">
+                  className="mt-6 rounded-full bg-[var(--color-primary)] px-7 py-2.5 text-sm font-semibold text-white hover:bg-[var(--color-secondary)] transition-colors">
                   Réessayer
                 </button>
               </div>
             ) : courses === null ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {[0, 1, 2].map((i) => (
-                  <div key={i} className="rounded-2xl border border-[rgba(13,110,187,0.12)] overflow-hidden animate-pulse">
-                    <div className="h-36 bg-[#0D6EBB]/10" />
+                  <div key={i} className="rounded-2xl border border-[rgb(var(--color-primary-rgb)/0.12)] overflow-hidden animate-pulse">
+                    <div className="h-36 bg-[var(--color-primary)]/10" />
                     <div className="p-5 space-y-3">
-                      <div className="h-4 bg-[#0D6EBB]/10 rounded w-2/3" />
-                      <div className="h-3 bg-[#0D6EBB]/10 rounded" />
-                      <div className="h-3 bg-[#0D6EBB]/10 rounded w-4/5" />
+                      <div className="h-4 bg-[var(--color-primary)]/10 rounded w-2/3" />
+                      <div className="h-3 bg-[var(--color-primary)]/10 rounded" />
+                      <div className="h-3 bg-[var(--color-primary)]/10 rounded w-4/5" />
                     </div>
                   </div>
                 ))}
@@ -158,8 +158,8 @@ export default function AcademyPage() {
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
                     transition={{ delay: i * 0.07 }}
-                    className="bg-white rounded-2xl border border-[rgba(13,110,187,0.12)] hover:border-[#0D6EBB] hover:shadow-xl transition-all duration-300 overflow-hidden group">
-                    <div className="bg-gradient-to-br from-[#0D6EBB] to-[#0DBD9F] h-36 flex items-center justify-center relative overflow-hidden">
+                    className="bg-white rounded-2xl border border-[rgb(var(--color-primary-rgb)/0.12)] hover:border-[var(--color-primary)] hover:shadow-xl transition-all duration-300 overflow-hidden group">
+                    <div className="bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-secondary)] h-36 flex items-center justify-center relative overflow-hidden">
                       <div className="absolute inset-0 opacity-20">
                         <div className="absolute top-4 right-4 w-20 h-20 rounded-full border-2 border-white" />
                         <div className="absolute -bottom-4 -left-4 w-32 h-32 rounded-full border-2 border-white" />
@@ -173,7 +173,7 @@ export default function AcademyPage() {
                         </span>
                         <span className="text-gray-400 text-xs">⏱ {course.duration}</span>
                       </div>
-                      <h3 className="text-gray-900 font-bold text-base mb-2 group-hover:text-[#0D6EBB] transition-colors leading-snug">{course.title}</h3>
+                      <h3 className="text-gray-900 font-bold text-base mb-2 group-hover:text-[var(--color-primary)] transition-colors leading-snug">{course.title}</h3>
                       <p className="text-gray-500 text-sm leading-relaxed line-clamp-2 mb-4">{course.description}</p>
                       <div className="flex items-center justify-between">
                         <span className="text-xs text-gray-400">{course.enrolled || 0} apprenants</span>
@@ -181,7 +181,7 @@ export default function AcademyPage() {
                           <motion.button
                             whileHover={{ scale: 1.04 }}
                             whileTap={{ scale: 0.96 }}
-                            className="bg-[#0D6EBB] hover:bg-[#0DBD9F] text-white text-sm font-semibold px-5 py-2 rounded-xl transition-colors duration-300">
+                            className="bg-[var(--color-primary)] hover:bg-[var(--color-secondary)] text-white text-sm font-semibold px-5 py-2 rounded-xl transition-colors duration-300">
                             Commencer
                           </motion.button>
                         </Link>
