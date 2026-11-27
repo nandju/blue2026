@@ -8,8 +8,9 @@ import { ACTIONS, MODULES } from "@/lib/adminLogConstants";
 import { stripCourseSecrets } from "@/lib/publicCourse";
 
 export const GET = apiHandler(async () => {
-  // Route publique : les bonnes réponses du quiz ne sont jamais exposées.
-  return NextResponse.json((await courses.list()).map(stripCourseSecrets));
+  // Route publique : seules les formations publiées ; les bonnes réponses
+  // du quiz ne sont jamais exposées.
+  return NextResponse.json((await courses.listPublished()).map(stripCourseSecrets));
 });
 
 export const POST = apiHandler(async (req) => {

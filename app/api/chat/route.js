@@ -1,8 +1,9 @@
 import { groq } from "@ai-sdk/groq";
 import { streamText } from "ai";
 import { chatRequestSchema } from "@/lib/validation";
-import { recruitment } from "@/lib/data";
+import { recruitment, courses } from "@/lib/data";
 import { computeStatus } from "@/lib/recruitmentModel";
+import { isPublished } from "@/lib/courseRules";
 
 export const maxDuration = 30;
 
@@ -62,9 +63,8 @@ Il n'existe plus de groupes WhatsApp de recrutement par zone : tout passe par /r
 
 BLUE ACADEMY
 - Plateforme de formations en ligne de BLUE
-- Formations disponibles: pollution plastique, formation d'ambassadeur, recyclage et économie circulaire
-- Accessible sur /academy
-- Certificat délivré après chaque formation (score minimum 80%)
+- Accessible sur /academy (seules les formations publiées sont visibles)
+- Certificat délivré après chaque formation (seuil de réussite défini par formation)
 - Deux types: certificat gratuit téléchargeable + certificat officiel signé par le Président (sur demande)
 
 RÈGLES ABSOLUES DE RÉPONSE
@@ -119,9 +119,22 @@ export async function POST(req) {
     // La liste ne doit jamais faire échouer le chat.
   }
 
+  // Formations publiées (les brouillons ne doivent jamais être cités).
+  let courseContext = "";
+  try {
+    const published = (await courses.list()).filter(isPublished);
+    if (published.length) {
+      courseContext = `\n\n---\nFORMATIONS PUBLIÉES SUR L'ACADEMY:\n${published
+        .map((c) => `- ${c.title}${c.level ? ` (${c.level})` : ""} → /academy/${c.id}`)
+        .join("\n")}`;
+    }
+  } catch {
+    // La liste ne doit jamais faire échouer le chat.
+  }
+
   const result = await streamText({
     model: groq("openai/gpt-oss-120b"),
-    system: SYSTEM_PROMPT + userContext + recContext,
+    system: SYSTEM_PROMPT + userContext + recContext + courseContext,
     messages,
     maxTokens: 600,
     temperature: 0.7,

@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { quizResults, courses, NotFoundError } from "@/lib/data";
 import { apiHandler, parseJson } from "@/lib/apiHandler";
 import { quizResultSchema } from "@/lib/validation";
-import { scoreQuiz } from "@/lib/academyRules";
+import { scoreQuiz, quizCorrections } from "@/lib/academyRules";
 import { getLearner } from "@/lib/learnerSession.server";
 import { z } from "zod";
 
@@ -31,12 +31,14 @@ export const POST = apiHandler(async (req) => {
   if (!learner && !email) {
     return NextResponse.json({ error: "Un email est requis pour enregistrer un résultat sans compte." }, { status: 400 });
   }
-  const { score, correct, total, passed } = scoreQuiz(course.quiz || [], answers);
+  const { score, correct, total, passed, threshold } = scoreQuiz(course.quiz || [], answers, course.pass_threshold);
   const result = await quizResults.add({
     courseId,
     email: learner?.email || email,
     learnerId: learner?.id || null,
     score, correct, total, passed,
   });
-  return NextResponse.json(result, { status: 201 });
+  // Les corrections (bonne réponse + explication) ne sont renvoyées QU'APRÈS
+  // la soumission — jamais dans les GET publics.
+  return NextResponse.json({ ...result, threshold, corrections: quizCorrections(course.quiz || []) }, { status: 201 });
 });
